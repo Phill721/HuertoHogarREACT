@@ -1,0 +1,27 @@
+.banner-final-img {
+    max-height: 180px;  /* más compacto */
+    object-fit: cover;
+}
+
+.banner-final-text h2 {
+    font-size: 1.5rem; /* más pequeño */
+}
+
+.banner-final-text p {
+    font-size: 1rem;
+}
+
+/* Móviles */
+@media (max-width: 768px) {
+    .banner-final-img {
+        max-height: 120px; /* súper compacto */
+    }
+
+    .banner-final-text h2 {
+        font-size: 1.2rem;
+    }
+
+    .banner-final-text p {
+        font-size: 0.9rem;
+    }
+}

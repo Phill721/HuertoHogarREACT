@@ -1,0 +1,20 @@
+.card {
+    max-width: 100%;
+}
+
+.card-img-top {
+    width: 100%;
+    height: auto;
+}
+
+.btn-buy {
+    background-color: #2E8B57;
+    color: white;
+    width: 100%; /* Botones ocupan todo el ancho en móvil */
+}
+
+@media(min-width: 768px) {
+    .btn-buy {
+        width: auto; /* Desktop mantiene su tamaño natural */
+    }
+}
