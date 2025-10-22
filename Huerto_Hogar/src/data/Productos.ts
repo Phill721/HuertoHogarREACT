@@ -1,8 +1,8 @@
 export interface Producto{
-    nombre : String,
-    descripcion : String,
-    precio : Number,
-    imagen : String
+    nombre : string,
+    descripcion : string,
+    precio : number,
+    imagen : string
     categoria : Categoria
 }
 export enum Categoria{
