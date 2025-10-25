@@ -1,35 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import './styles/navbar.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [paginaActual, setPaginaActual] = useState('admin'); // Página por defecto
+
+  const renderPagina = () => {
+    switch(paginaActual) {
+      case 'admin':
+        return <div>Página Admin - Próximamente</div>;
+      case 'productos-admin':
+        return <div>Página Productos Admin - Próximamente</div>;
+      case 'usuarios':
+        return <div>Página Usuarios - Próximamente</div>;
+      case 'ventas':
+        return <div>Página Ventas - Próximamente</div>;
+      default:
+        return <div>Página Admin - Próximamente</div>;
+    }
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="App">
+      <nav style={{ padding: '20px', background: '#f0f0f0', marginBottom: '20px' }}>
+        <button onClick={() => setPaginaActual('admin')} style={{ margin: '5px' }}>Admin</button>
+        <button onClick={() => setPaginaActual('productos-admin')} style={{ margin: '5px' }}>Productos</button>
+        <button onClick={() => setPaginaActual('usuarios')} style={{ margin: '5px' }}>Usuarios</button>
+        <button onClick={() => setPaginaActual('ventas')} style={{ margin: '5px' }}>Ventas</button>
+      </nav>
+      
+      <main>
+        {renderPagina()}
+      </main>
+
+      <footer style={{ marginTop: '50px', padding: '20px', background: '#333', color: 'white' }}>
+        Panel de Administración - Próximamente
+      </footer>
+    </div>
+  );
 }
 
-export default App
+export default App;
