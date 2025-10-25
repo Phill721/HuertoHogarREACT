@@ -1,4 +1,3 @@
-import { CardComponent } from "../components/card.component";
 import { ProductosGrid } from "../components/productgrid.components";
 import { productos } from "../data/Productos";
 

@@ -3,7 +3,7 @@ export function NavbarComponent(){
         <>
             <nav className="navbar navbar-expand-md navbar-dark" style={{ backgroundColor: '#2E8B57' }}>
                 <div className="container-fluid">
-                    <a className="navbar-brand d-flex align-items-center" href="index.html">
+                    <a className="navbar-brand d-flex align-items-center" href="/">
                         <img src="/src/img/iconmain.png" alt="Logo" style={{ width: 40 }} className="rounded-pill me-2" />
                         Tienda Huerto Hogar
                     </a>
@@ -13,7 +13,7 @@ export function NavbarComponent(){
                     <div className="collapse navbar-collapse" id="navbarContent">
                         <ul className="navbar-nav me-auto mb-2 mb-md-0 text-center text-md-start">
                             <li className="nav-item">
-                                <a className="nav-link nav-text" href="productos.html">Productos</a>
+                                <a className="nav-link nav-text" href="/productos">Productos</a>
                             </li>
                             <li className="nav-item">
                                 <a className="nav-link nav-text" href="nosotros.html">Nosotros</a>
