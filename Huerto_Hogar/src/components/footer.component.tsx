@@ -13,7 +13,7 @@ export function FooterComponent(){
                         <div className="col-12 col-md-3 mb-3">
                             <h5>Enlaces rápidos</h5>
                             <ul className="list-unstyled mb-0">
-                                <li><a href="index.html" className="text-white text-decoration-none">Inicio</a></li>
+                                <li><a href="/" className="text-white text-decoration-none">Inicio</a></li>
                                 <li><a href="/productos" className="text-white text-decoration-none">Productos</a></li>
                                 <li><a href="nosotros.html" className="text-white text-decoration-none">Nosotros</a></li>
                                 <li><a href="blogs.html" className="text-white text-decoration-none">Blogs</a></li>

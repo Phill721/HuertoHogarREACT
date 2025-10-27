@@ -2,8 +2,32 @@ import { useParams } from "react-router";
 import { productos, type Producto } from "../data/Productos";
 import { useState } from "react";
 import { ReviewSection } from "../components/reviewsection.component";
+import { ModalComponent } from "../components/modal.component";
 
 export function DetalleProducto() {
+    const [showModal, setShowModal] = useState(false);
+    const [modalInfo, setModalInfo] = useState({
+        title: "",
+        message: "",
+    });
+    const handleAddToCart = () => {
+        const input = document.getElementById("cantidad") as HTMLInputElement;
+        const cantidad = Number(input.value);
+
+        if (isNaN(cantidad) || cantidad < 1) {
+            setModalInfo({
+                title: "Error!",
+                message: "Por favor ingresa una cantidad valida (minimo 1)"
+            });
+            setShowModal(true);
+            return;
+        }
+        setModalInfo({
+            title: "Producto agregado!",
+            message: "Tu producto fue agregado al carrito correctamente!"
+        });
+        setShowModal(true);
+    }
     const { nombre } = useParams();
     const producto: Producto | undefined = productos.find(
         (p) => p.id.toLowerCase().replace(/\s+/g, "-") === nombre
@@ -79,9 +103,15 @@ export function DetalleProducto() {
                             className="form-control mb-3"
                             style={{ maxWidth: 100 }}
                         />
-                        <button className="btn btn-success mt-3">
+                        <button className="btn btn-success mt-3" onClick={handleAddToCart}>
                             Añadir al carrito
                         </button>
+                        <ModalComponent
+                        title={modalInfo.title}
+                        message={modalInfo.message}
+                        show={showModal}
+                        onClose={()=> setShowModal(false)}
+                        />
                         <hr />
                     </div>
                 </div>

@@ -13,7 +13,7 @@ export function CardComponent({ producto }: CardProps){
                     <div className="card-body d-flex flex-column">
                         <h4 className="card-title main-text">{producto.nombre}</h4>
                         <p className="card-text main-text">{producto.descripcion}</p>
-                        <a href={`/productos/${producto.id}`} className="btn mt-auto main-text btn-buy">Comprar: ${producto.precio}</a>
+                        <a href={`/productos/${producto.id}`} className="btn mt-auto main-text btn-buy">Comprar: ${producto.precio.toLocaleString()}</a>
                     </div>
                 </div>
             </div>
@@ -31,7 +31,7 @@ export function CardComponent2({ producto }: CardProps){
                     <div className="card-body d-flex flex-column">
                         <h4 className="card-title main-text">{producto.nombre}</h4>
                         <p className="card-text main-text">{producto.descripcion}</p>
-                        <a href={`/productos/${producto.id}`} className="btn mt-auto main-text" style={{ backgroundColor: '#2E8B57', color: 'white' }}>Comprar: ${producto.precio}</a>
+                        <a href={`/productos/${producto.id}`} className="btn mt-auto main-text" style={{ backgroundColor: '#2E8B57', color: 'white' }}>Comprar: ${producto.precio.toLocaleString()}</a>
                     </div>
                 </div>
             </div>
