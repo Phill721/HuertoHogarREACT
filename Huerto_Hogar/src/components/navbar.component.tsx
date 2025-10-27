@@ -22,7 +22,7 @@ export function NavbarComponent(){
                                 <a className="nav-link nav-text" href="blogs.html">Blogs</a>
                             </li>
                             <li className="nav-item">
-                                <a className="nav-link nav-text" href="contacto.html">Contactos</a>
+                                <a className="nav-link nav-text" href="/contacto">Contactos</a>
                             </li>
                         </ul>
                         <ul className="navbar-nav ms-auto text-center text-md-end">

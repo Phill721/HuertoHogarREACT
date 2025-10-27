@@ -17,7 +17,7 @@ export function FooterComponent(){
                                 <li><a href="/productos" className="text-white text-decoration-none">Productos</a></li>
                                 <li><a href="nosotros.html" className="text-white text-decoration-none">Nosotros</a></li>
                                 <li><a href="blogs.html" className="text-white text-decoration-none">Blogs</a></li>
-                                <li><a href="contacto.html" className="text-white text-decoration-none">Contactos</a></li>
+                                <li><a href="/contacto" className="text-white text-decoration-none">Contactos</a></li>
                             </ul>
                         </div>
                         {/* Sección 3: Categorías */}
