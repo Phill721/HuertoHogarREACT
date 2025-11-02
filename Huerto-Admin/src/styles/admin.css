@@ -1,0 +1,76 @@
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #2c3e50;
+    color: white;
+    padding: 20px 0;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-nav a {
+    display: block;
+    padding: 15px 20px;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background-color: #34495e;
+    color: #2ecc71;
+}
+
+.main-content {
+    flex: 1;
+    background-color: #f8f9fa;
+}
+
+.topbar {
+    background-color: white;
+    padding: 15px 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.topbar h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #2c3e50;
+}
+
+main {
+    padding: 20px;
+}
+
+.tarjeta-estadistica {
+    transition: transform 0.3s;
+    cursor: pointer;
+}
+
+.tarjeta-estadistica:hover {
+    transform: translateY(-5px);
+}
+
+.numero {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+.label {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}

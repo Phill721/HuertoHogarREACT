@@ -1,42 +1,24 @@
-import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import AdminLayout from './layouts/AdminLayout';
+import Admin from './pages/Admin';
+import ProductosAdmin from './pages/ProductosAdmin';
+import UsuariosAdmin from './pages/UsuariosAdmin';
+import VentasAdmin from './pages/VentasAdmin';
 import './styles/navbar.css';
+import './styles/admin.css';
 
-function App() {
-  const [paginaActual, setPaginaActual] = useState('admin'); // Página por defecto
-
-  const renderPagina = () => {
-    switch(paginaActual) {
-      case 'admin':
-        return <div>Página Admin - Próximamente</div>;
-      case 'productos-admin':
-        return <div>Página Productos Admin - Próximamente</div>;
-      case 'usuarios':
-        return <div>Página Usuarios - Próximamente</div>;
-      case 'ventas':
-        return <div>Página Ventas - Próximamente</div>;
-      default:
-        return <div>Página Admin - Próximamente</div>;
-    }
-  }
-
+export default function App() {
   return (
-    <div className="App">
-      <nav style={{ padding: '20px', background: '#f0f0f0', marginBottom: '20px' }}>
-        <button onClick={() => setPaginaActual('admin')} style={{ margin: '5px' }}>Admin</button>
-        <button onClick={() => setPaginaActual('productos-admin')} style={{ margin: '5px' }}>Productos</button>
-        <button onClick={() => setPaginaActual('usuarios')} style={{ margin: '5px' }}>Usuarios</button>
-        <button onClick={() => setPaginaActual('ventas')} style={{ margin: '5px' }}>Ventas</button>
-      </nav>
-      
-      <main>
-        {renderPagina()}
-      </main>
-
-      <footer style={{ marginTop: '50px', padding: '20px', background: '#333', color: 'white' }}>
-        Panel de Administración - Próximamente
-      </footer>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/admin" replace />} />
+        <Route element={<AdminLayout />}>
+          <Route path="admin" element={<Admin />} />
+          <Route path="productos-admin" element={<ProductosAdmin />} />
+          <Route path="usuarios" element={<UsuariosAdmin />} />
+          <Route path="ventas" element={<VentasAdmin />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;
