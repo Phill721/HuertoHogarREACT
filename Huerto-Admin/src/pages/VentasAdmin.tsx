@@ -2,32 +2,13 @@
 import { useState, useEffect } from 'react';
 import { Tabla } from '../components/Tabla';
 import { Toast } from '../components/Toast';
-import { Loader } from '../components/Loader';
 import type { Venta } from '../types/venta';
-import { getVentas, setVentas } from '../data/storage';
+import { getVentas } from '../data/storage';
 import { FaChartLine, FaShoppingCart, FaDollarSign } from 'react-icons/fa';
-
-interface FormVenta {
-  fecha: string;
-  total: number;
-  productos: Array<{
-    productoId: string;
-    nombre: string;
-    cantidad: number;
-    subtotal: number;
-  }>;
-}
-
-const initialFormData: FormVenta = {
-  fecha: new Date().toISOString().split('T')[0],
-  total: 0,
-  productos: []
-};
 
 export default function VentasAdmin() {
   const [ventas, setVentasState] = useState<Venta[]>([]);
   const [filtroFecha, setFiltroFecha] = useState<'hoy' | 'semana' | 'mes' | 'todo'>('todo');
-  const [cargando, setCargando] = useState(false);
   const [notificacion, setNotificacion] = useState<{
     mensaje: string;
     tipo: 'success' | 'error';
@@ -79,7 +60,7 @@ export default function VentasAdmin() {
   const totalPeriodo = ventasMostradas.reduce((sum, v) => sum + v.total, 0);
 
   return (
-    <div className={`container-fluid px-4 ${cargando ? 'loading' : ''}`}>
+    <div className="container-fluid px-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="mb-0">Registro de Ventas</h2>
       </div>
@@ -206,7 +187,6 @@ export default function VentasAdmin() {
         <div className="card-body">
           <h3 className="card-title mb-4">
             Historial de Ventas
-            {cargando && <Loader size="small" className="ms-2" />}
           </h3>
           <Tabla<Venta>
             data={ventasMostradas}
