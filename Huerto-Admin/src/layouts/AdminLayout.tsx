@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { FaHome, FaBox, FaUsers, FaShoppingCart } from 'react-icons/fa';
+import { FaHome, FaBox, FaUsers, FaShoppingCart, FaLeaf } from 'react-icons/fa';
 
 export default function AdminLayout() {
   const { pathname } = useLocation();
@@ -8,7 +8,10 @@ export default function AdminLayout() {
     <div className="admin-layout">
       <div className="sidebar">
         <div className="py-3 text-center">
-          <h2 className="text-white h4">Huerto Hogar</h2>
+          <h2 className="text-white h4">
+            <FaLeaf className="me-2" />
+            Huerto Hogar
+          </h2>
         </div>
         <nav className="sidebar-nav">
           <ul>
@@ -17,7 +20,7 @@ export default function AdminLayout() {
                 className={pathname === '/admin' ? 'active' : ''}
                 to="/admin"
               >
-                <FaHome className="me-2" /> Panel Principal
+                <FaHome /> Panel Principal
               </Link>
             </li>
             <li>
@@ -25,7 +28,7 @@ export default function AdminLayout() {
                 className={pathname === '/productos-admin' ? 'active' : ''}
                 to="/productos-admin"
               >
-                <FaBox className="me-2" /> Productos
+                <FaBox /> Productos
               </Link>
             </li>
             <li>
@@ -33,7 +36,7 @@ export default function AdminLayout() {
                 className={pathname === '/usuarios' ? 'active' : ''}
                 to="/usuarios"
               >
-                <FaUsers className="me-2" /> Usuarios
+                <FaUsers /> Usuarios
               </Link>
             </li>
             <li>
@@ -41,7 +44,7 @@ export default function AdminLayout() {
                 className={pathname === '/ventas' ? 'active' : ''}
                 to="/ventas"
               >
-                <FaShoppingCart className="me-2" /> Ventas
+                <FaShoppingCart /> Ventas
               </Link>
             </li>
           </ul>
@@ -51,12 +54,25 @@ export default function AdminLayout() {
       <div className="main-content">
         <header className="topbar">
           <div className="d-flex justify-content-between align-items-center">
-            <h1>Panel de Administración</h1>
             <div className="d-flex align-items-center">
-              <span className="text-muted me-3">Admin</span>
-              <div className="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style={{ width: 40, height: 40 }}>
-                A
-              </div>
+              <h1>Panel de Administración</h1>
+            </div>
+            <div>
+              <Link to="/admin" className="btn btn-outline-light me-2">
+                <FaHome className="me-2" />
+                Inicio
+              </Link>
+              <a 
+                href="/" 
+                className="btn btn-danger"
+                onClick={(e) => {
+                  if (!window.confirm('¿Está seguro de volver a la tienda?')) {
+                    e.preventDefault();
+                  }
+                }}
+              >
+                Volver a la Tienda
+              </a>
             </div>
           </div>
         </header>
