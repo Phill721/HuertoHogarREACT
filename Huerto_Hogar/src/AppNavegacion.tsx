@@ -5,6 +5,7 @@ import { Home } from "./pages/home";
 import { ProductosPage } from "./pages/productos";
 import { DetalleProducto } from "./pages/detalleproducto";
 import Contacto from "./pages/contacto";
+import { SignUp } from "./pages/signup";
 
 export function AppNavegacion(){
     return(
@@ -16,6 +17,7 @@ export function AppNavegacion(){
                     <Route path="/productos" element={<ProductosPage/>} />
                     <Route path="/productos/:nombre" element={<DetalleProducto/>} />
                     <Route path="/contacto" element={<Contacto/>} />
+                    <Route path="/registro" element={<SignUp/>} />
                 </Routes>
                 <FooterComponent/>
                 

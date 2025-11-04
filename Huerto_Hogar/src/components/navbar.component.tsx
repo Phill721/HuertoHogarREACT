@@ -1,19 +1,27 @@
+import type { CSSProperties } from "react";
+import { Link } from "react-router";
+
+const nodeco: CSSProperties = {
+    textDecoration: 'none'
+}
+
 export function NavbarComponent(){
     return(
         <>
             <nav className="navbar navbar-expand-md navbar-dark" style={{ backgroundColor: '#2E8B57' }}>
                 <div className="container-fluid">
-                    <a className="navbar-brand d-flex align-items-center" href="/">
+                    <Link to={"/"} style={nodeco}><a className="navbar-brand d-flex align-items-center" href="/">
                         <img src="/src/img/iconmain.png" alt="Logo" style={{ width: 40 }} className="rounded-pill me-2" />
                         Tienda Huerto Hogar
-                    </a>
+                    </a></Link>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon" />
                     </button>
                     <div className="collapse navbar-collapse" id="navbarContent">
                         <ul className="navbar-nav me-auto mb-2 mb-md-0 text-center text-md-start">
                             <li className="nav-item">
-                                <a className="nav-link nav-text" href="/productos">Productos</a>
+                                
+                                <Link to={"/productos"} style={nodeco}><a className="nav-link nav-text">Productos</a></Link>
                             </li>
                             <li className="nav-item">
                                 <a className="nav-link nav-text" href="nosotros.html">Nosotros</a>
@@ -22,7 +30,7 @@ export function NavbarComponent(){
                                 <a className="nav-link nav-text" href="blogs.html">Blogs</a>
                             </li>
                             <li className="nav-item">
-                                <a className="nav-link nav-text" href="/contacto">Contactos</a>
+                                <Link to={"/contacto"} style={nodeco}><a className="nav-link nav-text">Contactos</a></Link>
                             </li>
                         </ul>
                         <ul className="navbar-nav ms-auto text-center text-md-end">
@@ -30,7 +38,7 @@ export function NavbarComponent(){
                                 <a className="nav-link nav-text" href="iniciosesion.html">Iniciar sesión</a>
                             </li>
                             <li className="nav-item" id="register-link">
-                                <a className="nav-link nav-text" href="registro.html">Registrar usuario</a>
+                                <Link to={"/registro"} style={nodeco}><a className="nav-link nav-text">Registrar usuario</a></Link>
                             </li>
                             <li className="nav-item dropdown" id="profile-menu" style={{ display: 'none' }}>
                                 <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">Mi cuenta</a>
