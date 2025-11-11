@@ -1,4 +1,12 @@
+import { Link, useNavigate } from "react-router";
+import { nodeco } from "./navbar.component";
+
 export function FooterComponent(){
+    const navigate = useNavigate();
+
+    const handleCategoryClick = (categoria: string) => {
+        navigate(`/productos?categoria=${encodeURIComponent(categoria)}`);
+    };
     return(
         <>
             <footer className="p-2 p-md-4" style={{ backgroundColor: '#2E8B57', color: 'white' }}>
@@ -13,26 +21,55 @@ export function FooterComponent(){
                         <div className="col-12 col-md-3 mb-3">
                             <h5>Enlaces rápidos</h5>
                             <ul className="list-unstyled mb-0">
-                                <li><a href="/" className="text-white text-decoration-none">Inicio</a></li>
-                                <li><a href="/productos" className="text-white text-decoration-none">Productos</a></li>
-                                <li><a href="nosotros.html" className="text-white text-decoration-none">Nosotros</a></li>
+                                <li><Link to={"/"} style={nodeco} className="text-white text-decoration-none">Inicio</Link></li>
+                                <li><Link to={"/productos"} style={nodeco} className="text-white text-decoration-none">Productos</Link></li>
+                                <li><Link to={"/nosotros"} style={nodeco} className="text-white text-decoration-none">Nosotros</Link></li>
                                 <li><a href="blogs.html" className="text-white text-decoration-none">Blogs</a></li>
-                                <li><a href="/contacto" className="text-white text-decoration-none">Contactos</a></li>
+                                <li><Link to={"/contacto"} style={nodeco} className="text-white text-decoration-none">Contacto</Link></li>
                             </ul>
                         </div>
                         {/* Sección 3: Categorías */}
-                        <div className="col-12 col-md-3 mb-3">
-                            <h5>Categorías</h5>
-                            <ul className="list-unstyled mb-0">
-                                <li><a href="productos.html?category=fruit" className="text-white text-decoration-none">Frutas
-                                    frescas</a></li>
-                                <li><a href="productos.html?category=verdura" className="text-white text-decoration-none">Verduras
-                                    orgánicas</a></li>
-                                <li><a href="productos.html?category=organicproduct" className="text-white text-decoration-none">Productos orgánicos</a></li>
-                                <li><a href="productos.html?category=lacteos" className="text-white text-decoration-none">Productos
-                                    lácteos</a></li>
-                            </ul>
-                        </div>
+                    <div className="col-12 col-md-3 mb-3">
+                        <h5>Categorías</h5>
+                        <ul className="list-unstyled mb-0">
+                            <li>
+                                <a
+                                    onClick={() => handleCategoryClick("Frutas frescas")}
+                                    className="text-white text-decoration-none"
+                                    role="button"
+                                >
+                                    Frutas frescas
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    onClick={() => handleCategoryClick("Verduras Organicas")}
+                                    className="text-white text-decoration-none"
+                                    role="button"
+                                >
+                                    Verduras orgánicas
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    onClick={() => handleCategoryClick("Productos Organicos")}
+                                    className="text-white text-decoration-none"
+                                    role="button"
+                                >
+                                    Productos orgánicos
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    onClick={() => handleCategoryClick("Productos Lacteos")}
+                                    className="text-white text-decoration-none"
+                                    role="button"
+                                >
+                                    Productos lácteos
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                         {/* Sección 4: Contacto */}
                         <div className="col-12 col-md-3 mb-3">
                             <h5>Contacto</h5>
