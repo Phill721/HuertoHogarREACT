@@ -43,9 +43,9 @@ export function NavbarComponent() {
                             </Link>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link nav-text" href="nosotros.html">
+                            <Link to={"/nosotros"} style={nodeco} className="nav-link nav-text">
                                 Nosotros
-                            </a>
+                            </Link>
                         </li>
                         <li className="nav-item">
                             <a className="nav-link nav-text" href="blogs.html">
