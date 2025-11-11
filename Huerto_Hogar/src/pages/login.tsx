@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router"; // 👈 import para navegar
 import { ModalComponent } from "../components/modal.component";
 import { Button, TextBox } from "../components/input.component";
+import { UserContext } from "../context/UserContext"; // 👈 import del contexto
 
 export function Login() {
     const [correo, setCorreo] = useState("");
@@ -12,6 +13,7 @@ export function Login() {
     const [modalMessage, setModalMessage] = useState("");
 
     const navigate = useNavigate(); // 👈 inicializa el hook
+    const { login } = useContext(UserContext); // 👈 obtiene la función login del contexto
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -46,8 +48,8 @@ export function Login() {
             return;
         }
 
-        // Guardar al usuario logueado actual
-        localStorage.setItem("currentUser", JSON.stringify(foundUser));
+        // ✅ Guardar usuario actual usando el contexto
+        login(foundUser.nombre);
 
         // Mostrar modal de éxito
         setModalTitle("Bienvenido 🌿");
@@ -91,7 +93,6 @@ export function Login() {
                         </h4>
 
                         <form onSubmit={handleSubmit}>
-
                             <TextBox
                                 id="correo"
                                 label="Correo"
@@ -116,11 +117,12 @@ export function Login() {
                                 id="btnEnviar"
                                 className="btn"
                                 type="submit"
-                                name="Registrarse"
+                                name="Iniciar Sesión"
                             />
                         </form>
                     </div>
                 </div>
+
                 <ModalComponent
                     title={modalTitle}
                     message={modalMessage}
