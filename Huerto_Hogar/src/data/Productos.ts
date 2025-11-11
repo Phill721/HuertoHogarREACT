@@ -33,8 +33,8 @@ export const productos:Producto[]=[
         nombre : 'Naranjas Valencianas',
         descripcion : 'Jugosas y ricas en vitamina C, estas naranjas Valencia son ideales para zumos frescos y refrescantes. Cultivadas en condiciones climáticas óptimas que aseguran su dulzura y jugosidad',
         precio : 1000,
-        imagen : '/naranja1.jpg',
-        imagen2 : '/naranja1_1.webp',
+        imagen : '/naranja1_1.webp',
+        imagen2 : '/naranja1.jpg',
         imagen3 : '/naranja4.jpg',
         imagen4 : '/naranja1.jpg',
         categoria : Categoria.FrutasFrescas

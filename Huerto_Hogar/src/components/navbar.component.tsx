@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { Link } from "react-router";
 
-const nodeco: CSSProperties = {
+export const nodeco: CSSProperties = {
     textDecoration: 'none'
 }
 
@@ -35,7 +35,7 @@ export function NavbarComponent(){
                         </ul>
                         <ul className="navbar-nav ms-auto text-center text-md-end">
                             <li className="nav-item" id="login-link">
-                                <a className="nav-link nav-text" href="iniciosesion.html">Iniciar sesión</a>
+                                <Link to={"/iniciarsesion"} style={nodeco}><a className="nav-link nav-text" href="iniciosesion.html">Iniciar sesión</a></Link>
                             </li>
                             <li className="nav-item" id="register-link">
                                 <Link to={"/registro"} style={nodeco}><a className="nav-link nav-text">Registrar usuario</a></Link>

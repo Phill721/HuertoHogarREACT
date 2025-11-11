@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router"; // 👈 import para navegar
 import { ModalComponent } from "../components/modal.component";
 import { Button, TextBox } from "../components/input.component";
 
@@ -14,26 +15,86 @@ export function SignUp() {
     const [modalTitle, setModalTitle] = useState("");
     const [modalMessage, setModalMessage] = useState("");
 
+    const navigate = useNavigate(); // 👈 inicializa el hook
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validaciones básicas
         if (!nombre.trim() || !correo.trim() || !usuario.trim() || !contraseña.trim()) {
             setModalTitle("Error al enviar ❌");
-            setModalMessage("Por favor completa todos los campos con datos validos");
+            setModalMessage("Por favor completa todos los campos con datos válidos");
             setShowModal(true);
             return;
         }
-        // Modal de éxito
-        setModalTitle("Mensaje enviado!");
-        setModalMessage("Tu usuario ha sido registrado con exito!");
+
+        // Validación de dominios
+        const validDomains = ["@gmail.com", "@duoc.cl", "@profesor.duoc.cl"];
+        if (!validDomains.some(domain => correo.endsWith(domain))) {
+            setModalTitle("Correo inválido ❌");
+            setModalMessage("Solo se permiten correos de Gmail, Duoc o Profesor Duoc");
+            setShowModal(true);
+            return;
+        }
+
+        // Validación de confirmaciones
+        if (correo !== correoConfirm) {
+            setModalTitle("Error en correo ❌");
+            setModalMessage("Los correos no coinciden");
+            setShowModal(true);
+            return;
+        }
+
+        if (contraseña !== contraseñaConfirm) {
+            setModalTitle("Error en contraseña ❌");
+            setModalMessage("Las contraseñas no coinciden");
+            setShowModal(true);
+            return;
+        }
+
+        // Crear objeto del usuario
+        const userData = {
+            nombre,
+            usuario,
+            correo,
+            contraseña,
+        };
+
+        // Traer los usuarios guardados (si existen)
+        const existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
+
+        // Verificar si el correo ya está registrado
+        if (existingUsers.some((user: any) => user.correo === correo)) {
+            setModalTitle("Correo ya registrado ⚠️");
+            setModalMessage("Ya existe una cuenta con este correo");
+            setShowModal(true);
+            return;
+        }
+
+        // Agregar el nuevo usuario al array y guardar
+        existingUsers.push(userData);
+        localStorage.setItem("users", JSON.stringify(existingUsers));
+
+
+        // Mostrar modal de éxito
+        setModalTitle("Registro exitoso ✅");
+        setModalMessage("Tu usuario ha sido registrado correctamente");
         setShowModal(true);
-        // Limpiar formulario
+
+        // Limpiar campos
         setNombre("");
         setUsuario("");
         setCorreo("");
         setCorreoConfirm("");
         setContraseña("");
         setContraseñaConfirm("");
+
+        // Redirigir al home después de un pequeño delay para que el usuario vea el modal
+        setTimeout(() => {
+            navigate("/"); // 👈 redirección a la página principal
+        }, 1500);
     };
+
     return (
         <>
             <div className="container my-5">
@@ -61,7 +122,6 @@ export function SignUp() {
                         </h4>
 
                         <form onSubmit={handleSubmit}>
-                            {/* Campo Nombre Completo */}
                             <TextBox
                                 id="nombre"
                                 label="Nombre"
@@ -72,7 +132,6 @@ export function SignUp() {
                                 onChange={(e) => setNombre(e.target.value)}
                             />
 
-                            {/* Campo Nombre de usuario */}
                             <TextBox
                                 id="usuario"
                                 label="Usuario"
@@ -83,7 +142,6 @@ export function SignUp() {
                                 onChange={(e) => setUsuario(e.target.value)}
                             />
 
-                            {/* Campo Correo */}
                             <TextBox
                                 id="correo"
                                 label="Correo"
@@ -94,7 +152,6 @@ export function SignUp() {
                                 onChange={(e) => setCorreo(e.target.value)}
                             />
 
-                            {/* Campo Correo confirmacion */}
                             <TextBox
                                 id="correo-confirm"
                                 label="Confirma tu correo"
@@ -105,7 +162,6 @@ export function SignUp() {
                                 onChange={(e) => setCorreoConfirm(e.target.value)}
                             />
 
-                            {/* Campo Contraseña */}
                             <TextBox
                                 id="contraseña"
                                 label="Contraseña"
@@ -116,7 +172,6 @@ export function SignUp() {
                                 onChange={(e) => setContraseña(e.target.value)}
                             />
 
-                            {/* Campo Contraseña confirmacion */}
                             <TextBox
                                 id="contraseña-confirm"
                                 label="Confirma tu contraseña"
@@ -127,7 +182,6 @@ export function SignUp() {
                                 onChange={(e) => setContraseñaConfirm(e.target.value)}
                             />
 
-                            {/* Botón */}
                             <Button
                                 id="btnEnviar"
                                 className="btn"
@@ -145,5 +199,5 @@ export function SignUp() {
                 />
             </div>
         </>
-    )
+    );
 }
