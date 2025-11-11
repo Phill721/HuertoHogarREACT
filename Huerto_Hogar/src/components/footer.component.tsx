@@ -24,7 +24,7 @@ export function FooterComponent(){
                                 <li><Link to={"/"} style={nodeco} className="text-white text-decoration-none">Inicio</Link></li>
                                 <li><Link to={"/productos"} style={nodeco} className="text-white text-decoration-none">Productos</Link></li>
                                 <li><Link to={"/nosotros"} style={nodeco} className="text-white text-decoration-none">Nosotros</Link></li>
-                                <li><a href="blogs.html" className="text-white text-decoration-none">Blogs</a></li>
+                                <li><Link to={"/blogs"} style={nodeco} className="text-white text-decoration-none">Blogs</Link></li>
                                 <li><Link to={"/contacto"} style={nodeco} className="text-white text-decoration-none">Contacto</Link></li>
                             </ul>
                         </div>

@@ -10,6 +10,7 @@ export const nodeco: CSSProperties = {
 export function NavbarComponent() {
     
     const { currentUser, logout } = useContext(UserContext);
+    
     return (
         <nav className="navbar navbar-expand-md navbar-dark" style={{ backgroundColor: '#2E8B57' }}>
             <div className="container-fluid">
@@ -48,9 +49,9 @@ export function NavbarComponent() {
                             </Link>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link nav-text" href="blogs.html">
+                            <Link to={"/blogs"} style={nodeco} className="nav-link nav-text" >
                                 Blogs
-                            </a>
+                            </Link>
                         </li>
                         <li className="nav-item">
                             <Link to="/contacto" style={nodeco} className="nav-link nav-text">
