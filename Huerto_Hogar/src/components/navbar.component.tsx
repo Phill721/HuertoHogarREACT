@@ -18,7 +18,7 @@ export function NavbarComponent() {
             <div className="container-fluid">
                 <Link to="/" style={nodeco} className="navbar-brand d-flex align-items-center">
                     <img
-                        src="/src/img/iconmain.png"
+                        src="/iconmain.png"
                         alt="Logo"
                         style={{ width: 40 }}
                         className="rounded-pill me-2"
