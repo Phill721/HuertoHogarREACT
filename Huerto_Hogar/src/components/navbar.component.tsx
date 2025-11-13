@@ -1,6 +1,7 @@
 import { useContext, type CSSProperties } from "react";
 import { Link } from "react-router";
 import { UserContext } from "../context/UserContext";
+import { CarritoModal } from "./modalcart.component";
 
 
 export const nodeco: CSSProperties = {
@@ -12,6 +13,7 @@ export function NavbarComponent() {
     const { currentUser, logout } = useContext(UserContext);
     
     return (
+        <>
         <nav className="navbar navbar-expand-md navbar-dark" style={{ backgroundColor: '#2E8B57' }}>
             <div className="container-fluid">
                 <Link to="/" style={nodeco} className="navbar-brand d-flex align-items-center">
@@ -120,5 +122,7 @@ export function NavbarComponent() {
                 </div>
             </div>
         </nav>
+        <CarritoModal/>
+        </>
     );
 }

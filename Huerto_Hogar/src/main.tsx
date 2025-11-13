@@ -6,12 +6,15 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import './css/navbar.css'
 import './css/index.css'
 import { UserProvider } from './context/UserContext'
+import { CartProvider } from './context/CartContext'
 
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-  <UserProvider>
-    <AppNavegacion/>
-  </UserProvider>
+  <CartProvider>
+    <UserProvider>
+      <AppNavegacion/>
+    </UserProvider>
+  </CartProvider>
   </StrictMode>,
 )
