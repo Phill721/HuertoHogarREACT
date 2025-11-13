@@ -9,6 +9,7 @@ import { SignUp } from "./pages/signup";
 import { Login } from "./pages/login";
 import { AboutUs } from "./pages/nosotros";
 import { Blogs } from "./pages/blogs";
+import { CarritoDedicado } from "./pages/carrito";
 
 export function AppNavegacion(){
     return(
@@ -24,6 +25,7 @@ export function AppNavegacion(){
                     <Route path="/iniciarsesion" element={<Login/>} />
                     <Route path="/nosotros" element={<AboutUs/>} />
                     <Route path="/blogs" element={<Blogs/>} />
+                    <Route path="/checkout" element={<CarritoDedicado/>} />
                 </Routes>
                 <FooterComponent/>
             </BrowserRouter>

@@ -1,8 +1,22 @@
 import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
+import { useNavigate } from "react-router";
 
 export function CarritoModal() {
     const { cart, updateQuantity, removeFromCart, total } = useContext(CartContext);
+    const navigate = useNavigate();
+
+    const handleIrAlCarrito = () => {
+        // Cierra el modal usando la API de Bootstrap
+        const modalElement = document.getElementById("carritoModal");
+        if (modalElement) {
+            const modalInstance = (window as any).bootstrap?.Modal.getInstance(modalElement);
+            if (modalInstance) modalInstance.hide();
+        }
+
+        // Redirige al carrito dedicado
+        navigate("/checkout");
+    };
 
     return (
         <div
@@ -83,13 +97,13 @@ export function CarritoModal() {
                         >
                             Cerrar
                         </button>
-                        <a
-                            href="/carrito"
+                        <button
+                            onClick={handleIrAlCarrito}
                             className="btn"
                             style={{ backgroundColor: "#2E8B57", color: "white" }}
                         >
                             Ir al carrito
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
