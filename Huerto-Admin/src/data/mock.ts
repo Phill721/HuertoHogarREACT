@@ -88,7 +88,7 @@ export const MOCK_VENTAS: Venta[] = [
   { 
     id: 'v1', 
     fecha: '2025-10-20', 
-    total: 12990,
+    total: 13430,
     detalles: [
       { productoId: 'p1', cantidad: 2, subtotal: 1980, nombre: 'Lechuga Hidropónica' },
       { productoId: 'p3', cantidad: 3, subtotal: 7470, nombre: 'Manzana Fuji' },
@@ -98,7 +98,7 @@ export const MOCK_VENTAS: Venta[] = [
   { 
     id: 'v2', 
     fecha: '2025-10-21', 
-    total: 8990,
+    total: 8340,
     detalles: [
       { productoId: 'p2', cantidad: 4, subtotal: 5160, nombre: 'Tomate Orgánico' },
       { productoId: 'p4', cantidad: 2, subtotal: 3180, nombre: 'Plátano Orgánico' }
@@ -107,7 +107,7 @@ export const MOCK_VENTAS: Venta[] = [
   { 
     id: 'v3', 
     fecha: '2025-10-22', 
-    total: 15990,
+    total: 15940,
     detalles: [
       { productoId: 'p6', cantidad: 2, subtotal: 11980, nombre: 'Abono Orgánico' },
       { productoId: 'p1', cantidad: 4, subtotal: 3960, nombre: 'Lechuga Hidropónica' }
@@ -116,7 +116,7 @@ export const MOCK_VENTAS: Venta[] = [
   { 
     id: 'v4', 
     fecha: '2025-10-23', 
-    total: 9990,
+    total: 8960,
     detalles: [
       { productoId: 'p3', cantidad: 2, subtotal: 4980, nombre: 'Manzana Fuji' },
       { productoId: 'p5', cantidad: 2, subtotal: 3980, nombre: 'Yogurt Natural' }
