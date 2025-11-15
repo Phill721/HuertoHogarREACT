@@ -89,10 +89,16 @@ export function SignUp() {
         setContraseña("");
         setContraseñaConfirm("");
 
-        // Redirigir al home después de un pequeño delay para que el usuario vea el modal
+
+        // 🔀 Redirección según dominio
         setTimeout(() => {
-            navigate("/"); // 👈 redirección a la página principal
+            if (correo.endsWith("@profesor.duoc.cl")) {
+                navigate("/admin"); // 👉 profesores van a /admin
+            } else {
+                navigate("/"); // 👉 usuarios normales a la home
+            }
         }, 1500);
+
     };
 
     return (

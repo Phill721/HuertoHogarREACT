@@ -36,10 +36,10 @@ export function AppNavegacion() {
                     <Route path="/nosotros" element={<AboutUs />} />
                     <Route path="/blogs" element={<Blogs />} />
                     <Route path="/checkout" element={<CarritoDedicado />} />
-                    <Route path="admin" element={<Admin />} />
-                    <Route path="productos-admin" element={<ProductosAdmin />} />
-                    <Route path="usuarios" element={<UsuariosAdmin />} />
-                    <Route path="ventas" element={<VentasAdmin />} />
+                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/productos-admin" element={<ProductosAdmin />} />
+                    <Route path="/usuarios" element={<UsuariosAdmin />} />
+                    <Route path="/ventas" element={<VentasAdmin />} />
                 </Routes>
                 <FooterComponent />
             </BrowserRouter>

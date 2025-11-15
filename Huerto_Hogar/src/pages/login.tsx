@@ -49,7 +49,7 @@ export function Login() {
         }
 
         // ✅ Guardar usuario actual usando el contexto
-        login(foundUser.nombre);
+        login(foundUser.nombre, foundUser.correo);
 
         // Mostrar modal de éxito
         setModalTitle("Bienvenido 🌿");
@@ -61,9 +61,15 @@ export function Login() {
         setContraseña("");
 
         // Redirigir después de un pequeño delay
+        // 🔀 Redirección según dominio
         setTimeout(() => {
-            navigate("/");
+            if (correo.endsWith("@profesor.duoc.cl")) {
+                navigate("/admin"); // 👉 profesores van a /admin
+            } else {
+                navigate("/"); // 👉 usuarios normales a la home
+            }
         }, 1500);
+
     };
 
     return (

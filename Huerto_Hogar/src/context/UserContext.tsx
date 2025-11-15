@@ -1,8 +1,13 @@
 import { createContext, useEffect, useState, type ReactNode } from "react";
 
+interface UserData {
+    user: string;
+    correo: string;
+}
+
 interface UserContextType {
-    currentUser: string | null;
-    login: (user: string) => void;
+    currentUser: UserData | null;
+    login: (user: string, correo: string) => void;
     logout: () => void;
 }
 
@@ -13,16 +18,17 @@ export const UserContext = createContext<UserContextType>({
 });
 
 export function UserProvider({ children }: { children: ReactNode }) {
-    const [currentUser, setCurrentUser] = useState<string | null>(null);
+    const [currentUser, setCurrentUser] = useState<UserData | null>(null);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem("currentUser");
-        if (storedUser) setCurrentUser(storedUser);
+        const stored = localStorage.getItem("currentUser");
+        if (stored) setCurrentUser(JSON.parse(stored));
     }, []);
 
-    const login = (user: string) => {
-        localStorage.setItem("currentUser", user);
-        setCurrentUser(user);
+    const login = (user: string, correo: string) => {
+        const data = { user, correo };
+        localStorage.setItem("currentUser", JSON.stringify(data));
+        setCurrentUser(data);
     };
 
     const logout = () => {
