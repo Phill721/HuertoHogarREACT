@@ -108,7 +108,7 @@ export function BlogPosts() {
         const nuevoPost: Post = {
             titulo,
             contenido,
-            autor: currentUser,
+            autor: currentUser.user,
             comentarios: [],
         };
 
@@ -129,7 +129,7 @@ export function BlogPosts() {
             nuevos[index] = {
                 ...nuevos[index],
                 comentarios: [
-                    { autor: currentUser, texto },
+                    { autor: currentUser.user, texto },
                     ...nuevos[index].comentarios,
                 ],
             };
