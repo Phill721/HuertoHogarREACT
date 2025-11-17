@@ -5,6 +5,7 @@ import { Toast } from '../components/Toast';
 import { Loader } from '../components/Loader';
 import type { Producto } from '../types/producto';
 import { getProductos, setProductos } from '../data/storage';
+import * as api from '../services/api';
 
 interface FormData {
   id: string;
@@ -47,7 +48,17 @@ export default function ProductosAdmin() {
 
   // Cargar datos del localStorage al montar el componente
   useEffect(() => {
-    setProductosState(getProductos());
+    let mounted = true;
+    (async () => {
+      try {
+        const prods = await api.fetchProductos();
+        if (mounted) setProductosState(prods);
+      } catch (e) {
+        // fallback a localStorage
+        if (mounted) setProductosState(getProductos());
+      }
+    })();
+    return () => { mounted = false };
   }, []);
 
   // Actualizar localStorage cuando cambian los productos
@@ -89,27 +100,25 @@ export default function ProductosAdmin() {
       await new Promise(resolve => setTimeout(resolve, 500)); // Simulación de latencia
 
       if (editando) {
-        const nuevosProductos = productos.map(p => 
-          p.id === formData.id ? { ...formData } : p
-        );
-        setProductosState(nuevosProductos);
-        setProductos(nuevosProductos);
-        setNotificacion({
-          mensaje: 'Producto actualizado exitosamente',
-          tipo: 'success'
-        });
+        try {
+          const updated = await api.updateProducto(formData.id, { ...formData } as Producto);
+          const nuevosProductos = productos.map(p => p.id === updated.id ? updated : p);
+          setProductosState(nuevosProductos);
+          setProductos(nuevosProductos);
+          setNotificacion({ mensaje: 'Producto actualizado exitosamente', tipo: 'success' });
+        } catch (e) {
+          setNotificacion({ mensaje: 'Error al actualizar producto', tipo: 'error' });
+        }
       } else {
-        const nuevoProducto = { 
-          ...formData, 
-          id: Date.now().toString() 
-        };
-        const nuevosProductos = [...productos, nuevoProducto];
-        setProductosState(nuevosProductos);
-        setProductos(nuevosProductos);
-        setNotificacion({
-          mensaje: 'Producto agregado exitosamente',
-          tipo: 'success'
-        });
+        try {
+          const created = await api.createProducto({ ...formData } as Producto);
+          const nuevosProductos = [...productos, created];
+          setProductosState(nuevosProductos);
+          setProductos(nuevosProductos);
+          setNotificacion({ mensaje: 'Producto agregado exitosamente', tipo: 'success' });
+        } catch (e) {
+          setNotificacion({ mensaje: 'Error al crear producto', tipo: 'error' });
+        }
       }
       handleCancelar();
     } catch (error) {
@@ -143,15 +152,11 @@ export default function ProductosAdmin() {
 
     setCargando(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulación de latencia
-      
+      await api.deleteProducto(producto.id);
       const nuevosProductos = productos.filter(p => p.id !== producto.id);
       setProductosState(nuevosProductos);
       setProductos(nuevosProductos);
-      setNotificacion({
-        mensaje: 'Producto eliminado exitosamente',
-        tipo: 'success'
-      });
+      setNotificacion({ mensaje: 'Producto eliminado exitosamente', tipo: 'success' });
     } catch (error) {
       setNotificacion({
         mensaje: 'Error al eliminar el producto',

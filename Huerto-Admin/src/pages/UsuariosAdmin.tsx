@@ -5,6 +5,7 @@ import { Toast } from '../components/Toast';
 import { Loader } from '../components/Loader';
 import type { Usuario } from '../types/usuario';
 import { getUsuarios, setUsuarios } from '../data/storage';
+import * as api from '../services/api';
 
 interface FormData {
   id: string;
@@ -41,7 +42,16 @@ export default function UsuariosAdmin() {
 
   // Cargar datos del localStorage al montar el componente
   useEffect(() => {
-    setUsuariosState(getUsuarios());
+    let mounted = true;
+    (async () => {
+      try {
+        const users = await api.fetchUsuarios();
+        if (mounted) setUsuariosState(users);
+      } catch (e) {
+        if (mounted) setUsuariosState(getUsuarios());
+      }
+    })();
+    return () => { mounted = false };
   }, []);
 
   // Actualizar localStorage cuando cambian los usuarios
@@ -84,27 +94,34 @@ export default function UsuariosAdmin() {
       await new Promise(resolve => setTimeout(resolve, 500)); // Simulación de latencia
 
       if (editando) {
-        const nuevosUsuarios = usuarios.map(u => 
-          u.id === formData.id ? { ...formData } : u
-        );
-        setUsuariosState(nuevosUsuarios);
-        setUsuarios(nuevosUsuarios);
-        setNotificacion({
-          mensaje: 'Usuario actualizado exitosamente',
-          tipo: 'success'
-        });
+        try {
+          const updated = await api.updateUsuario(formData.id, formData as Usuario);
+          const nuevosUsuarios = usuarios.map(u => u.id === updated.id ? updated : u);
+          setUsuariosState(nuevosUsuarios);
+          setUsuarios(nuevosUsuarios);
+          setNotificacion({ mensaje: 'Usuario actualizado exitosamente', tipo: 'success' });
+        } catch (e) {
+          // fallback local
+          const nuevosUsuarios = usuarios.map(u => u.id === formData.id ? { ...formData } : u);
+          setUsuariosState(nuevosUsuarios);
+          setUsuarios(nuevosUsuarios);
+          setNotificacion({ mensaje: 'Usuario actualizado (modo offline)', tipo: 'success' });
+        }
       } else {
-        const nuevoUsuario = { 
-          ...formData, 
-          id: Date.now().toString() 
-        };
-        const nuevosUsuarios = [...usuarios, nuevoUsuario];
-        setUsuariosState(nuevosUsuarios);
-        setUsuarios(nuevosUsuarios);
-        setNotificacion({
-          mensaje: 'Usuario agregado exitosamente',
-          tipo: 'success'
-        });
+        try {
+          const created = await api.createUsuario(formData as Usuario);
+          const nuevosUsuarios = [...usuarios, created];
+          setUsuariosState(nuevosUsuarios);
+          setUsuarios(nuevosUsuarios);
+          setNotificacion({ mensaje: 'Usuario agregado exitosamente', tipo: 'success' });
+        } catch (e) {
+          // fallback local
+          const nuevoUsuario = { ...formData, id: Date.now().toString() };
+          const nuevosUsuarios = [...usuarios, nuevoUsuario];
+          setUsuariosState(nuevosUsuarios);
+          setUsuarios(nuevosUsuarios);
+          setNotificacion({ mensaje: 'Usuario agregado (modo offline)', tipo: 'success' });
+        }
       }
       handleCancelar();
     } catch (error) {
@@ -143,20 +160,21 @@ export default function UsuariosAdmin() {
 
     setCargando(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulación de latencia
-      
-      const nuevosUsuarios = usuarios.filter(u => u.id !== usuario.id);
-      setUsuariosState(nuevosUsuarios);
-      setUsuarios(nuevosUsuarios);
-      setNotificacion({
-        mensaje: 'Usuario eliminado exitosamente',
-        tipo: 'success'
-      });
+      try {
+        await api.deleteUsuario(usuario.id);
+        const nuevosUsuarios = usuarios.filter(u => u.id !== usuario.id);
+        setUsuariosState(nuevosUsuarios);
+        setUsuarios(nuevosUsuarios);
+        setNotificacion({ mensaje: 'Usuario eliminado exitosamente', tipo: 'success' });
+      } catch (e) {
+        // fallback local
+        const nuevosUsuarios = usuarios.filter(u => u.id !== usuario.id);
+        setUsuariosState(nuevosUsuarios);
+        setUsuarios(nuevosUsuarios);
+        setNotificacion({ mensaje: 'Usuario eliminado (modo offline)', tipo: 'success' });
+      }
     } catch (error) {
-      setNotificacion({
-        mensaje: 'Error al eliminar el usuario',
-        tipo: 'error'
-      });
+      setNotificacion({ mensaje: 'Error al eliminar el usuario', tipo: 'error' });
     } finally {
       setCargando(false);
     }

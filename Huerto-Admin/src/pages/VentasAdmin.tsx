@@ -4,6 +4,7 @@ import { Tabla } from '../components/Tabla';
 import { Toast } from '../components/Toast';
 import type { Venta } from '../types/venta';
 import { getVentas } from '../data/storage';
+import * as api from '../services/api';
 import { FaChartLine, FaShoppingCart, FaDollarSign } from 'react-icons/fa';
 
 export default function VentasAdmin() {
@@ -16,7 +17,16 @@ export default function VentasAdmin() {
 
   // Cargar datos del localStorage al montar el componente
   useEffect(() => {
-    setVentasState(getVentas());
+    let mounted = true;
+    (async () => {
+      try {
+        const v = await api.fetchVentas();
+        if (mounted) setVentasState(v);
+      } catch (e) {
+        if (mounted) setVentasState(getVentas());
+      }
+    })();
+    return () => { mounted = false };
   }, []);
   
   const formatearFecha = (fecha: string) => {
