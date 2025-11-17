@@ -107,11 +107,7 @@ export function NavbarComponent() {
                                             </>
                                         )}
 
-                                        <li>
-                                            <Link to="/perfil" className="dropdown-item">
-                                                Perfil
-                                            </Link>
-                                        </li>
+                                        
 
                                         <li>
                                             <hr className="dropdown-divider" />
