@@ -3,6 +3,7 @@ import type { Producto } from '../types/producto';
 import type { Usuario } from '../types/usuario';
 import type { Venta } from '../types/venta';
 
+// Datos de ejemplo para productos
 export const MOCK_PRODUCTOS: Producto[] = [
   { 
     id: 'p1', 
