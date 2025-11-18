@@ -83,6 +83,14 @@ export default function ProductosAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validarFormulario()) return;
+    // Confirmar antes de agregar o actualizar
+    if (editando) {
+      const confirmar = window.confirm('¿Confirma que desea actualizar este producto?');
+      if (!confirmar) return;
+    } else {
+      const confirmar = window.confirm('¿Confirma que desea agregar este nuevo producto?');
+      if (!confirmar) return;
+    }
 
     setCargando(true);
     try {
@@ -98,6 +106,8 @@ export default function ProductosAdmin() {
           mensaje: 'Producto actualizado exitosamente',
           tipo: 'success'
         });
+        // Mostrar alerta adicional para confirmación visible
+        window.alert('Producto actualizado exitosamente');
       } else {
         const nuevoProducto = { 
           ...formData, 
@@ -110,6 +120,8 @@ export default function ProductosAdmin() {
           mensaje: 'Producto agregado exitosamente',
           tipo: 'success'
         });
+        // Mostrar alerta adicional para confirmación visible
+        window.alert('Producto agregado exitosamente');
       }
       handleCancelar();
     } catch (error) {
@@ -152,6 +164,8 @@ export default function ProductosAdmin() {
         mensaje: 'Producto eliminado exitosamente',
         tipo: 'success'
       });
+      // Mostrar alerta adicional para confirmación visible
+      window.alert('Producto eliminado exitosamente');
     } catch (error) {
       setNotificacion({
         mensaje: 'Error al eliminar el producto',

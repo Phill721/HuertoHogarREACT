@@ -78,6 +78,14 @@ export default function UsuariosAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validarFormulario()) return;
+    // Confirmar antes de agregar o actualizar
+    if (editando) {
+      const confirmar = window.confirm('¿Confirma que desea actualizar este usuario?');
+      if (!confirmar) return;
+    } else {
+      const confirmar = window.confirm('¿Confirma que desea agregar este nuevo usuario?');
+      if (!confirmar) return;
+    }
 
     setCargando(true);
     try {
@@ -93,6 +101,8 @@ export default function UsuariosAdmin() {
           mensaje: 'Usuario actualizado exitosamente',
           tipo: 'success'
         });
+        // Mostrar alerta adicional para confirmación visible
+        window.alert('Usuario actualizado exitosamente');
       } else {
         const nuevoUsuario = { 
           ...formData, 
@@ -105,6 +115,8 @@ export default function UsuariosAdmin() {
           mensaje: 'Usuario agregado exitosamente',
           tipo: 'success'
         });
+        // Mostrar alerta adicional para confirmación visible
+        window.alert('Usuario agregado exitosamente');
       }
       handleCancelar();
     } catch (error) {
@@ -152,6 +164,8 @@ export default function UsuariosAdmin() {
         mensaje: 'Usuario eliminado exitosamente',
         tipo: 'success'
       });
+      // Mostrar alerta adicional para confirmación visible
+      window.alert('Usuario eliminado exitosamente');
     } catch (error) {
       setNotificacion({
         mensaje: 'Error al eliminar el usuario',
