@@ -293,8 +293,8 @@ export default function UsuariosAdmin() {
                 key: 'rol', 
                 header: 'Rol',
                 render: (r) => (
-                  <span 
-                    className={`badge ${r.rol === 'admin' ? 'badge-success' : 'badge-primary'}`}
+                  <span
+                    className={`badge admin-badge ${r.rol === 'admin' ? 'admin-badge--success' : 'admin-badge--primary'}`}
                     data-tooltip={r.rol === 'admin' ? 'Usuario con privilegios administrativos' : 'Usuario regular'}
                   >
                     {r.rol === 'admin' ? 'Administrador' : 'Usuario'}
@@ -305,8 +305,8 @@ export default function UsuariosAdmin() {
                 key: 'activo', 
                 header: 'Estado',
                 render: (r) => (
-                  <span 
-                    className={`badge ${r.activo ? 'badge-success' : 'badge-danger'}`}
+                  <span
+                    className={`badge admin-badge ${r.activo ? 'admin-badge--success' : 'admin-badge--danger'}`}
                     data-tooltip={r.activo ? 'Usuario activo en el sistema' : 'Usuario desactivado'}
                   >
                     {r.activo ? 'Activo' : 'Inactivo'}

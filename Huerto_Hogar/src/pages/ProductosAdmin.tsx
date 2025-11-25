@@ -342,12 +342,12 @@ export default function ProductosAdmin() {
                 key: 'activo', 
                 header: 'Estado', 
                 render: (r) => (
-                  <span 
-                    className={`badge ${r.activo ? 'badge-success' : 'badge-danger'}`}
-                    data-tooltip={r.activo ? 'Producto disponible' : 'Producto no disponible'}
-                  >
-                    {r.activo ? 'Activo' : 'Inactivo'}
-                  </span>
+                  <span
+                      className={`badge admin-badge ${r.activo ? 'admin-badge--success' : 'admin-badge--danger'}`}
+                      data-tooltip={r.activo ? 'Producto disponible' : 'Producto no disponible'}
+                    >
+                      {r.activo ? 'Activo' : 'Inactivo'}
+                    </span>
                 ),
                 className: 'text-center'
               },

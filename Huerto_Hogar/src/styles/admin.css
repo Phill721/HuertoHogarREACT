@@ -11,6 +11,11 @@
     --transition: all 0.3s ease;
 }
 
+/* Evitar que el modo oscuro forzado del navegador invierta colores importantes */
+html, body {
+    color-scheme: light;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -312,6 +317,56 @@ main {
     border: 1px solid rgba(220, 53, 69, 0.2);
 }
 
+/* Asegurar contraste legible para badges por defecto y otros estados */
+.badge {
+    color: var(--text-main);
+    background-color: rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.04);
+}
+
+.badge-primary {
+    background-color: rgba(13,110,253,0.08);
+    color: #0d6efd;
+    border: 1px solid rgba(13,110,253,0.12);
+}
+
+.badge-success {
+    background-color: rgba(46, 139, 87, 0.12);
+    color: var(--accent-green);
+    border: 1px solid rgba(46, 139, 87, 0.18);
+}
+
+.badge-danger {
+    background-color: rgba(220, 53, 69, 0.12);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.18);
+}
+
+/* Clases específicas para el admin que previenen inversión de colores por modo oscuro */
+.admin-badge {
+    forced-color-adjust: none !important;
+    -webkit-text-fill-color: unset !important;
+    mix-blend-mode: normal !important;
+}
+
+.admin-badge--primary {
+    background-color: var(--accent-green) !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+.admin-badge--success {
+    background-color: var(--accent-green) !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+.admin-badge--danger {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+    border: none !important;
+}
+
 /* Responsividad */
 @media (max-width: 768px) {
     body {
@@ -398,6 +453,24 @@ main {
   height: 100%;
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(2px);
+
+/* Forzar fondo verde y texto blanco en badges de rol/estado para buena legibilidad */
+.badge-success,
+.badge-primary {
+    background-color: var(--accent-green) !important;
+    color: #fff !important;
+    border: none !important;
+    -webkit-text-fill-color: #fff !important;
+    forced-color-adjust: none !important;
+    mix-blend-mode: normal !important;
+    filter: none !important;
+}
+
+.badge-danger {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+    border: none !important;
+}
   display: flex;
   align-items: center;
   justify-content: center;
