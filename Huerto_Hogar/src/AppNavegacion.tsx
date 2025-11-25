@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import { FooterComponent } from "./components/footer.component";
 import { NavbarComponent } from "./components/navbar.component";
 import { Home } from "./pages/home";
@@ -16,16 +16,21 @@ import Admin from "./pages/Admin";
 import ProductosAdmin from "./pages/ProductosAdmin";
 import UsuariosAdmin from "./pages/UsuariosAdmin";
 import VentasAdmin from "./pages/VentasAdmin";
+import AdminLayout from "./layouts/AdminLayout";
 
 export function AppNavegacion() {
     useEffect(() => {
         // Inicializar datos en localStorage si no existen
         initializeStorageData();
     }, []);
-    return (
-        <>
-            <BrowserRouter>
-                <NavbarComponent />
+    function AppRoutes() {
+        const { pathname } = useLocation();
+        const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/productos-admin') || pathname.startsWith('/usuarios') || pathname.startsWith('/ventas');
+
+        return (
+            <>
+                {!isAdminRoute && <NavbarComponent />}
+
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/productos" element={<ProductosPage />} />
@@ -36,13 +41,24 @@ export function AppNavegacion() {
                     <Route path="/nosotros" element={<AboutUs />} />
                     <Route path="/blogs" element={<Blogs />} />
                     <Route path="/checkout" element={<CarritoDedicado />} />
-                    <Route path="/admin" element={<Admin />} />
-                    <Route path="/productos-admin" element={<ProductosAdmin />} />
-                    <Route path="/usuarios" element={<UsuariosAdmin />} />
-                    <Route path="/ventas" element={<VentasAdmin />} />
+
+                    {/* Rutas de admin usan AdminLayout (sin Navbar/Footer del cliente) */}
+                    <Route element={<AdminLayout />}>
+                        <Route path="admin" element={<Admin />} />
+                        <Route path="productos-admin" element={<ProductosAdmin />} />
+                        <Route path="usuarios" element={<UsuariosAdmin />} />
+                        <Route path="ventas" element={<VentasAdmin />} />
+                    </Route>
                 </Routes>
-                <FooterComponent />
-            </BrowserRouter>
-        </>
-    )
+
+                {!isAdminRoute && <FooterComponent />}
+            </>
+        );
+    }
+
+    return (
+        <BrowserRouter>
+            <AppRoutes />
+        </BrowserRouter>
+    );
 }

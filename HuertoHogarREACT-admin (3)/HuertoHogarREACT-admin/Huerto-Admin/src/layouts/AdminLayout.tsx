@@ -1,7 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { FaHome, FaBox, FaUsers, FaShoppingCart, FaLeaf } from 'react-icons/fa';
-import '../styles/navbar.css';
-import '../styles/admin.css';
 
 export default function AdminLayout() {
   const { pathname } = useLocation();

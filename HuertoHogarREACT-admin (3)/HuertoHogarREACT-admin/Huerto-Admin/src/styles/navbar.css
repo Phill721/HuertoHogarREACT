@@ -1,0 +1,24 @@
+/* Fonts */
+@font-face {
+    font-family: "Playfair Display";
+    src: url("fonts/PlayFair/static/PlayfairDisplay-Regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Montserrat";
+    src: url("fonts/Montserrat/static/Montserrat-Regular.ttf");
+}
+/* Clases personalizadas */
+.nav-text {
+    font-family: "Playfair Display", serif;
+}
+
+.main-text {
+    font-family: "Montserrat", serif;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0px;
+}
