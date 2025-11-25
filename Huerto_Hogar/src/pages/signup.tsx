@@ -58,6 +58,7 @@ export function SignUp() {
             usuario,
             correo,
             contraseña,
+            rol: 'user'
         };
 
         // Traer los usuarios guardados (si existen)

@@ -143,21 +143,18 @@ export default function UsuariosAdmin() {
   };
 
   const handleEliminar = async (usuario: Usuario) => {
-    if (usuario.rol === 'admin') {
-      setNotificacion({
-        mensaje: 'No se puede eliminar un usuario administrador',
-        tipo: 'error'
-      });
-      return;
-    }
+    console.log('handleEliminar called for user:', usuario.id, usuario.nombre, usuario.rol);
 
-    if (!window.confirm('¿Está seguro de eliminar este usuario?')) return;
-
+    // Nota: permitimos eliminar cualquier usuario, incluido admin.
+    // La confirmación se realiza en el botón de la tabla (Tabla.tsx),
+    // por eso aquí no pedimos confirmación adicional para evitar doble diálogo.
     setCargando(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500)); // Simulación de latencia
-      
+
       const nuevosUsuarios = usuarios.filter(u => u.id !== usuario.id);
+      console.log('Usuarios antes:', usuarios.map(u => u.id));
+      console.log('Usuarios después (por guardar):', nuevosUsuarios.map(u => u.id));
       setUsuariosState(nuevosUsuarios);
       setUsuarios(nuevosUsuarios);
       setNotificacion({
@@ -171,6 +168,7 @@ export default function UsuariosAdmin() {
         mensaje: 'Error al eliminar el usuario',
         tipo: 'error'
       });
+      console.error('Error en handleEliminar:', error);
     } finally {
       setCargando(false);
     }

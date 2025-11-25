@@ -17,6 +17,7 @@ import ProductosAdmin from "./pages/ProductosAdmin";
 import UsuariosAdmin from "./pages/UsuariosAdmin";
 import VentasAdmin from "./pages/VentasAdmin";
 import AdminLayout from "./layouts/AdminLayout";
+import RequireAdmin from './components/RequireAdmin';
 
 export function AppNavegacion() {
     useEffect(() => {
@@ -43,7 +44,7 @@ export function AppNavegacion() {
                     <Route path="/checkout" element={<CarritoDedicado />} />
 
                     {/* Rutas de admin usan AdminLayout (sin Navbar/Footer del cliente) */}
-                    <Route element={<AdminLayout />}>
+                    <Route element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
                         <Route path="admin" element={<Admin />} />
                         <Route path="productos-admin" element={<ProductosAdmin />} />
                         <Route path="usuarios" element={<UsuariosAdmin />} />

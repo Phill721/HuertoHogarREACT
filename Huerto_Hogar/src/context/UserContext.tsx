@@ -3,6 +3,7 @@ import { createContext, useEffect, useState, type ReactNode } from "react";
 interface UserData {
     user: string;
     correo: string;
+    rol?: 'admin' | 'user';
 }
 
 interface UserContextType {
@@ -25,8 +26,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         if (stored) setCurrentUser(JSON.parse(stored));
     }, []);
 
-    const login = (user: string, correo: string) => {
-        const data = { user, correo };
+    const login = (user: string, correo: string, rol: 'admin' | 'user' = 'user') => {
+        const data: UserData = { user, correo, rol };
         localStorage.setItem("currentUser", JSON.stringify(data));
         setCurrentUser(data);
     };

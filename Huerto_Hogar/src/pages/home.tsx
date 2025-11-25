@@ -17,7 +17,7 @@ export function Home(){
                                 en más de 9 puntos del país, incluyendo Santiago, Puerto Montt, Villarica, Nacimiento, Viña del Mar,
                                 Valparaíso y Concepción. Promovemos un estilo de vida saludable y sostenible.
                             </p>
-                            <Link to={"/productos"} style={nodeco}><a className="btn btn-outline-light me-2 mb-2">Ver productos</a></Link>
+                            <Link to={"/productos"} style={nodeco} className="btn btn-outline-light me-2 mb-2">Ver productos</Link>
                         </div>
                         <div className="col-md-5 text-center">
                             <img src="/banner1.jpeg" className="img-fluid rounded shadow" alt="Huerto Hogar" style={{ maxHeight: 300, objectFit: 'cover' }} />

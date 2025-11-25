@@ -48,8 +48,8 @@ export function Login() {
             return;
         }
 
-        // ✅ Guardar usuario actual usando el contexto
-        login(foundUser.nombre, foundUser.correo);
+        // ✅ Guardar usuario actual usando el contexto (si existe rol en el registro, usarlo)
+        login(foundUser.nombre, foundUser.correo, foundUser.rol ?? 'user');
 
         // Mostrar modal de éxito
         setModalTitle("Bienvenido 🌿");
@@ -63,10 +63,13 @@ export function Login() {
         // Redirigir después de un pequeño delay
         // 🔀 Redirección según dominio
         setTimeout(() => {
-            if (correo.endsWith("@profesor.duoc.cl")) {
-                navigate("/admin"); // 👉 profesores van a /admin
+            // Redirigir a admin si el correo pertenece al dominio de profesores o el usuario tiene rol 'admin'
+            const isDomainAdmin = correo.endsWith("@profesor.duoc.cl");
+            const isRoleAdmin = (foundUser.rol && foundUser.rol === 'admin');
+            if (isDomainAdmin || isRoleAdmin) {
+                navigate("/admin");
             } else {
-                navigate("/"); // 👉 usuarios normales a la home
+                navigate("/");
             }
         }, 1500);
 
