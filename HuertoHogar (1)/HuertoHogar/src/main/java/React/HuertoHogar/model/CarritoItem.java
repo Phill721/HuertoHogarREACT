@@ -1,7 +1,6 @@
 package React.HuertoHogar.model;
 
 import jakarta.persistence.*;
-import React.HuertoHogar.model.Carrito;
 
 @Entity
 @Table(name = "carrito_items")

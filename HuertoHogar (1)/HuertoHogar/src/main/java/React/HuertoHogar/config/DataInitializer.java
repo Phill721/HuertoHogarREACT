@@ -2,6 +2,8 @@ package React.HuertoHogar.config;
 
 import React.HuertoHogar.model.Producto;
 import React.HuertoHogar.repository.ProductoRepository;
+import React.HuertoHogar.service.UsuarioService;
+import React.HuertoHogar.model.Usuario;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -11,9 +13,11 @@ import java.util.List;
 public class DataInitializer implements CommandLineRunner {
 
     private final ProductoRepository productoRepository;
+    private final UsuarioService usuarioService;
 
-    public DataInitializer(ProductoRepository productoRepository) {
+    public DataInitializer(ProductoRepository productoRepository, UsuarioService usuarioService) {
         this.productoRepository = productoRepository;
+        this.usuarioService = usuarioService;
     }
 
     @Override
@@ -42,6 +46,32 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("[DataInitializer] productos guardados.");
         } else {
             System.out.println("[DataInitializer] no se requieren inserciones.");
+        }
+
+        // Insertar usuarios de ejemplo si no existen
+        try {
+            if (usuarioService.findAll().isEmpty()) {
+                System.out.println("[DataInitializer] insertando usuarios de ejemplo...");
+                Usuario admin = new Usuario();
+                admin.setNombre("Admin");
+                admin.setEmail("admin@gmail.com");
+                admin.setRol("admin");
+                admin.setPassword("admin123");
+                admin.setActivo(true);
+
+                Usuario user = new Usuario();
+                user.setNombre("Juan Perez");
+                user.setEmail("juan@ejemplo.com");
+                user.setRol("user");
+                user.setPassword("user123");
+                user.setActivo(true);
+
+                usuarioService.save(admin);
+                usuarioService.save(user);
+                System.out.println("[DataInitializer] usuarios guardados.");
+            }
+        } catch (Exception ex) {
+            System.err.println("[DataInitializer] error insertando usuarios: " + ex.getMessage());
         }
 
         // Mostrar tablas existentes (consultando el repositorio para forzar inicialización)

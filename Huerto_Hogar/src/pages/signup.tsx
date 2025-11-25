@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router"; // 👈 import para navegar
 import { ModalComponent } from "../components/modal.component";
 import { Button, TextBox } from "../components/input.component";
+import usuarioService from '../services/usuarioService';
+import { UserContext } from '../context/UserContext';
 
 export function SignUp() {
     const [nombre, setNombre] = useState("");
@@ -16,8 +18,9 @@ export function SignUp() {
     const [modalMessage, setModalMessage] = useState("");
 
     const navigate = useNavigate(); // 👈 inicializa el hook
+    const { login } = useContext(UserContext);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         // Validaciones básicas
@@ -52,53 +55,62 @@ export function SignUp() {
             return;
         }
 
-        // Crear objeto del usuario
-        const userData = {
-            nombre,
-            usuario,
-            correo,
-            contraseña,
-            rol: 'user'
-        };
+        try {
+            // preparar payload para backend
+            const payload = {
+                nombre,
+                email: correo,
+                password: contraseña,
+                rol: 'user',
+                activo: true
+            };
 
-        // Traer los usuarios guardados (si existen)
-        const existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
-
-        // Verificar si el correo ya está registrado
-        if (existingUsers.some((user: any) => user.correo === correo)) {
-            setModalTitle("Correo ya registrado ⚠️");
-            setModalMessage("Ya existe una cuenta con este correo");
-            setShowModal(true);
-            return;
-        }
-
-        // Agregar el nuevo usuario al array y guardar
-        existingUsers.push(userData);
-        localStorage.setItem("users", JSON.stringify(existingUsers));
-
-
-        // Mostrar modal de éxito
-        setModalTitle("Registro exitoso ✅");
-        setModalMessage("Tu usuario ha sido registrado correctamente");
-        setShowModal(true);
-
-        // Limpiar campos
-        setNombre("");
-        setUsuario("");
-        setCorreo("");
-        setCorreoConfirm("");
-        setContraseña("");
-        setContraseñaConfirm("");
-
-
-        // 🔀 Redirección según dominio
-        setTimeout(() => {
-            if (correo.endsWith("@profesor.duoc.cl")) {
-                navigate("/admin"); // 👉 profesores van a /admin
-            } else {
-                navigate("/"); // 👉 usuarios normales a la home
+            // comprobar si existe usuario con ese email
+            const all = await usuarioService.getAll();
+            if (all.some((u: any) => (u.email || '').toLowerCase() === correo.toLowerCase())) {
+                setModalTitle("Correo ya registrado ⚠️");
+                setModalMessage("Ya existe una cuenta con este correo");
+                setShowModal(true);
+                return;
             }
-        }, 1500);
+
+            const created = await usuarioService.create(payload);
+
+            // iniciar sesión localmente
+            try {
+                login(created.nombre || created.email || usuario, created.email || correo, created.rol || 'user');
+            } catch (e) {
+                // si no hay contexto, guardar currentUser en localStorage como respaldo
+                localStorage.setItem('currentUser', JSON.stringify({ user: created.nombre || created.email || usuario, correo: created.email || correo, rol: created.rol || 'user' }));
+            }
+
+            // Mostrar modal de éxito
+            setModalTitle("Registro exitoso ✅");
+            setModalMessage("Tu usuario ha sido registrado correctamente");
+            setShowModal(true);
+
+            // Limpiar campos
+            setNombre("");
+            setUsuario("");
+            setCorreo("");
+            setCorreoConfirm("");
+            setContraseña("");
+            setContraseñaConfirm("");
+
+            // 🔀 Redirección según dominio
+            setTimeout(() => {
+                if (correo.endsWith("@profesor.duoc.cl")) {
+                    navigate("/admin"); // 👉 profesores van a /admin
+                } else {
+                    navigate("/"); // 👉 usuarios normales a la home
+                }
+            }, 1200);
+        } catch (error) {
+            console.error('Error registrando usuario:', error);
+            setModalTitle('Error en el registro ❌');
+            setModalMessage('Ocurrió un problema al registrar el usuario. Intenta de nuevo.');
+            setShowModal(true);
+        }
 
     };
 

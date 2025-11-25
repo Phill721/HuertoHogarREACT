@@ -2,6 +2,9 @@ import { useContext, useState } from "react";
 import { CartContext } from "../context/CartContext";
 import { ModalComponent } from "../components/modal.component";
 import { discountCodes } from "../data/descuentos";
+import carritoService from '../services/carritoService';
+import usuarioService from '../services/usuarioService';
+import { UserContext } from '../context/UserContext';
 
 
 export function CarritoDedicado() {
@@ -10,6 +13,7 @@ export function CarritoDedicado() {
     const [descuento, setDescuento] = useState(0);
     const [mensaje, setMensaje] = useState("");
     const [showModal, setShowModal] = useState(false);
+    const [cargando, setCargando] = useState(false);
 
     const aplicarDescuento = () => {
         const encontrado = discountCodes.find(
@@ -32,7 +36,48 @@ export function CarritoDedicado() {
             alert("Tu carrito está vacío 😅");
             return;
         }
-        setShowModal(true);
+        realizarCheckout();
+    };
+
+    const realizarCheckout = async () => {
+        setCargando(true);
+        try {
+            // intentar obtener id de usuario por correo almacenado en UserContext
+            const current = ({} as any);
+            // obtener current user desde localStorage o contexto
+            // preferir UserContext si está disponible
+            let correo: string | undefined;
+            try {
+                const ctx = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                if (ctx && ctx.correo) correo = ctx.correo;
+            } catch (e) {}
+
+            if (!correo) {
+                alert('Debes iniciar sesión para completar la compra');
+                return;
+            }
+
+            // buscar usuario por email
+            const usuarios = await usuarioService.getAll();
+            const usuario = usuarios.find((u: any) => (u.email || u.correo || '').toLowerCase() === correo!.toLowerCase());
+            if (!usuario) {
+                alert('Usuario no encontrado en el servidor. Crea una cuenta o contacta al administrador.');
+                return;
+            }
+
+            // Si el backend gestiona carrito por usuario, aseguramos items en carrito persistente si fuera necesario
+            // Realizar checkout
+            const venta = await carritoService.checkout(usuario.id);
+            console.log('Venta creada:', venta);
+            setShowModal(true);
+            // limpiar carrito local
+            clearCart();
+        } catch (error) {
+            console.error('Error al realizar checkout:', error);
+            alert('Error al procesar la compra. Revisa la consola para más detalles.');
+        } finally {
+            setCargando(false);
+        }
     };
 
     const handleCloseModal = () => {

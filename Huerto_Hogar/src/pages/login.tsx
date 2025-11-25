@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router"; // 👈 import para navegar
 import { ModalComponent } from "../components/modal.component";
 import { Button, TextBox } from "../components/input.component";
+import usuarioService from '../services/usuarioService';
 import { UserContext } from "../context/UserContext"; // 👈 import del contexto
 
 export function Login() {
@@ -15,7 +16,7 @@ export function Login() {
     const navigate = useNavigate(); // 👈 inicializa el hook
     const { login } = useContext(UserContext); // 👈 obtiene la función login del contexto
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!correo.trim() || !contraseña.trim()) {
@@ -33,45 +34,41 @@ export function Login() {
             return;
         }
 
-        // Obtener todos los usuarios registrados
-        const users = JSON.parse(localStorage.getItem("users") || "[]");
+        try {
+            const foundUser = await usuarioService.login(correo, contraseña);
+            // Guardar usuario actual usando el contexto (usar email del backend)
+            login(foundUser.nombre || foundUser.email || correo, foundUser.email || correo, (foundUser.rol as any) ?? 'user');
 
-        // Buscar coincidencia
-        const foundUser = users.find(
-            (user: any) => user.correo === correo && user.contraseña === contraseña
-        );
+            // Mostrar modal de éxito
+            setModalTitle("Bienvenido 🌿");
+            setModalMessage(`Hola ${foundUser.nombre || foundUser.email}, has iniciado sesión correctamente`);
+            setShowModal(true);
 
-        if (!foundUser) {
+            // Limpiar campos
+            setCorreo("");
+            setContraseña("");
+
+            // Redirigir después de un pequeño delay
+            setTimeout(() => {
+                const isDomainAdmin = correo.endsWith("@profesor.duoc.cl");
+                const isRoleAdmin = (foundUser.rol && foundUser.rol === 'admin');
+                if (isDomainAdmin || isRoleAdmin) {
+                    navigate("/admin");
+                } else {
+                    navigate("/");
+                }
+            }, 1500);
+        } catch (err: any) {
+            console.error('Login error', err);
             setModalTitle("Error de inicio de sesión ❌");
-            setModalMessage("Correo o contraseña incorrectos.");
+            if (err && err.message && err.message.includes('401')) {
+                setModalMessage("Correo o contraseña incorrectos.");
+            } else {
+                setModalMessage("Ocurrió un error al conectar con el servidor.");
+            }
             setShowModal(true);
             return;
         }
-
-        // ✅ Guardar usuario actual usando el contexto (si existe rol en el registro, usarlo)
-        login(foundUser.nombre, foundUser.correo, foundUser.rol ?? 'user');
-
-        // Mostrar modal de éxito
-        setModalTitle("Bienvenido 🌿");
-        setModalMessage(`Hola ${foundUser.nombre}, has iniciado sesión correctamente`);
-        setShowModal(true);
-
-        // Limpiar campos
-        setCorreo("");
-        setContraseña("");
-
-        // Redirigir después de un pequeño delay
-        // 🔀 Redirección según dominio
-        setTimeout(() => {
-            // Redirigir a admin si el correo pertenece al dominio de profesores o el usuario tiene rol 'admin'
-            const isDomainAdmin = correo.endsWith("@profesor.duoc.cl");
-            const isRoleAdmin = (foundUser.rol && foundUser.rol === 'admin');
-            if (isDomainAdmin || isRoleAdmin) {
-                navigate("/admin");
-            } else {
-                navigate("/");
-            }
-        }, 1500);
 
     };
 

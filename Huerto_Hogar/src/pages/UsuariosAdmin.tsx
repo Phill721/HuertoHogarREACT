@@ -5,11 +5,14 @@ import { Toast } from '../components/Toast';
 import { Loader } from '../components/Loader';
 import type { Usuario } from '../types/usuario';
 import { getUsuarios, setUsuarios } from '../data/storage';
+import usuarioService from '../services/usuarioService';
 
 interface FormData {
   id: string;
   nombre: string;
   email: string;
+  password?: string;
+  passwordConfirm?: string;
   rol: 'admin' | 'user';
   activo: boolean;
 }
@@ -18,6 +21,8 @@ const initialFormData: FormData = {
   id: '',
   nombre: '',
   email: '',
+  password: '',
+  passwordConfirm: '',
   rol: 'user',
   activo: true
 };
@@ -25,6 +30,7 @@ const initialFormData: FormData = {
 interface FormErrors {
   nombre?: string;
   email?: string;
+  password?: string;
 }
 
 export default function UsuariosAdmin() {
@@ -41,14 +47,35 @@ export default function UsuariosAdmin() {
 
   // Cargar datos del localStorage al montar el componente
   useEffect(() => {
-    setUsuariosState(getUsuarios());
+    const load = async () => {
+      setCargando(true);
+      try {
+        const list = await usuarioService.getAll();
+        // mapear id numérico a string para la UI
+        const mapped: Usuario[] = list.map((u: any) => ({
+          id: String(u.id),
+          nombre: u.nombre || u.email || '',
+          email: u.email || '',
+          rol: (u.rol as 'admin' | 'user') || 'user',
+          activo: u.activo == null ? true : !!u.activo,
+        }));
+        setUsuariosState(mapped);
+        // actualizar localStorage como cache
+        setUsuarios(mapped);
+      } catch (err) {
+        console.warn('No se pudo cargar usuarios desde API, usando localStorage', err);
+        setUsuariosState(getUsuarios());
+      } finally {
+        setCargando(false);
+      }
+    };
+    load();
   }, []);
 
   // Actualizar localStorage cuando cambian los usuarios
   useEffect(() => {
-    if (usuarios.length > 0) {
-      setUsuarios(usuarios);
-    }
+    // siempre mantener cache local
+    setUsuarios(usuarios);
   }, [usuarios]);
 
   const validarFormulario = (): boolean => {
@@ -71,6 +98,24 @@ export default function UsuariosAdmin() {
       }
     }
 
+    // Validación de contraseña: si estamos creando (no editando) requiere contraseña;
+    // si estamos editando, la contraseña es opcional, pero si se ingresa debe coincidir con la confirmación
+    if (!editando) {
+      if (!formData.password || formData.password.length < 6) {
+        nuevosErrores.password = 'La contraseña es requerida (mínimo 6 caracteres)';
+      } else if (formData.password !== formData.passwordConfirm) {
+        nuevosErrores.password = 'Las contraseñas no coinciden';
+      }
+    } else {
+      if (formData.password && formData.password.length > 0) {
+        if (formData.password.length < 6) {
+          nuevosErrores.password = 'La contraseña debe tener al menos 6 caracteres';
+        } else if (formData.password !== formData.passwordConfirm) {
+          nuevosErrores.password = 'Las contraseñas no coinciden';
+        }
+      }
+    }
+
     setErrores(nuevosErrores);
     return Object.keys(nuevosErrores).length === 0;
   };
@@ -89,41 +134,42 @@ export default function UsuariosAdmin() {
 
     setCargando(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulación de latencia
+      // construir payload para backend
+      const payload: any = {
+        nombre: formData.nombre,
+        email: formData.email,
+        rol: formData.rol,
+        activo: formData.activo,
+      };
+      if (formData.password && formData.password.length > 0) payload.password = formData.password;
 
       if (editando) {
-        const nuevosUsuarios = usuarios.map(u => 
-          u.id === formData.id ? { ...formData } : u
-        );
+        // id en UI es string; backend espera número
+        const idNum = Number(formData.id);
+        const updated = await usuarioService.update(idNum, payload);
+        // actualizar estado localmente
+        const nuevosUsuarios = usuarios.map(u => u.id === String(updated.id) ? { ...u, nombre: updated.nombre || u.nombre, email: updated.email || u.email, rol: (updated.rol as any) || u.rol, activo: updated.activo == null ? u.activo : !!updated.activo } : u);
         setUsuariosState(nuevosUsuarios);
-        setUsuarios(nuevosUsuarios);
-        setNotificacion({
-          mensaje: 'Usuario actualizado exitosamente',
-          tipo: 'success'
-        });
-        // Mostrar alerta adicional para confirmación visible
+        setNotificacion({ mensaje: 'Usuario actualizado exitosamente', tipo: 'success' });
         window.alert('Usuario actualizado exitosamente');
       } else {
-        const nuevoUsuario = { 
-          ...formData, 
-          id: Date.now().toString() 
+        const created = await usuarioService.create(payload);
+        const nuevoUsuario: Usuario = {
+          id: String(created.id),
+          nombre: created.nombre || created.email || formData.nombre,
+          email: created.email || formData.email,
+          rol: (created.rol as any) || formData.rol,
+          activo: created.activo == null ? true : !!created.activo,
         };
         const nuevosUsuarios = [...usuarios, nuevoUsuario];
         setUsuariosState(nuevosUsuarios);
-        setUsuarios(nuevosUsuarios);
-        setNotificacion({
-          mensaje: 'Usuario agregado exitosamente',
-          tipo: 'success'
-        });
-        // Mostrar alerta adicional para confirmación visible
+        setNotificacion({ mensaje: 'Usuario agregado exitosamente', tipo: 'success' });
         window.alert('Usuario agregado exitosamente');
       }
       handleCancelar();
-    } catch (error) {
-      setNotificacion({
-        mensaje: 'Error al procesar la operación',
-        tipo: 'error'
-      });
+    } catch (error: any) {
+      console.error('Error creando/actualizando usuario:', error);
+      setNotificacion({ mensaje: error?.message || 'Error al procesar la operación', tipo: 'error' });
     } finally {
       setCargando(false);
     }
@@ -137,38 +183,42 @@ export default function UsuariosAdmin() {
   };
 
   const handleEditar = (usuario: Usuario) => {
-    setFormData(usuario);
+    setFormData({ ...usuario, password: '', passwordConfirm: '' });
     setMostrarFormulario(true);
     setEditando(true);
   };
 
   const handleEliminar = async (usuario: Usuario) => {
-    console.log('handleEliminar called for user:', usuario.id, usuario.nombre, usuario.rol);
-
-    // Nota: permitimos eliminar cualquier usuario, incluido admin.
-    // La confirmación se realiza en el botón de la tabla (Tabla.tsx),
-    // por eso aquí no pedimos confirmación adicional para evitar doble diálogo.
-    setCargando(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulación de latencia
-
-      const nuevosUsuarios = usuarios.filter(u => u.id !== usuario.id);
-      console.log('Usuarios antes:', usuarios.map(u => u.id));
-      console.log('Usuarios después (por guardar):', nuevosUsuarios.map(u => u.id));
-      setUsuariosState(nuevosUsuarios);
-      setUsuarios(nuevosUsuarios);
+    if (usuario.rol === 'admin') {
       setNotificacion({
-        mensaje: 'Usuario eliminado exitosamente',
-        tipo: 'success'
-      });
-      // Mostrar alerta adicional para confirmación visible
-      window.alert('Usuario eliminado exitosamente');
-    } catch (error) {
-      setNotificacion({
-        mensaje: 'Error al eliminar el usuario',
+        mensaje: 'No se puede eliminar un usuario administrador',
         tipo: 'error'
       });
-      console.error('Error en handleEliminar:', error);
+      return;
+    }
+
+    if (!window.confirm('¿Está seguro de eliminar este usuario?')) return;
+
+    setCargando(true);
+    try {
+      // intentar eliminar en backend
+      const idNum = Number(usuario.id);
+      await usuarioService.remove(idNum);
+      const nuevosUsuarios = usuarios.filter(u => u.id !== usuario.id);
+      setUsuariosState(nuevosUsuarios);
+      setNotificacion({ mensaje: 'Usuario eliminado exitosamente', tipo: 'success' });
+      window.alert('Usuario eliminado exitosamente');
+    } catch (err) {
+      console.warn('Error eliminando desde API, aplicando fallback a localStorage', err);
+      try {
+        const nuevosUsuarios = usuarios.filter(u => u.id !== usuario.id);
+        setUsuariosState(nuevosUsuarios);
+        setUsuarios(nuevosUsuarios);
+        setNotificacion({ mensaje: 'Usuario eliminado (fallback)', tipo: 'success' });
+        window.alert('Usuario eliminado exitosamente (modo offline)');
+      } catch (e) {
+        setNotificacion({ mensaje: 'Error al eliminar el usuario', tipo: 'error' });
+      }
     } finally {
       setCargando(false);
     }
@@ -216,6 +266,31 @@ export default function UsuariosAdmin() {
                   required
                 />
                 {errores.email && <div className="invalid-feedback">{errores.email}</div>}
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="password" className="form-label">Contraseña {editando ? '(opcional)' : '*'}</label>
+                <input
+                  type="password"
+                  className={`form-control ${errores.password ? 'is-invalid' : ''}`}
+                  id="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  {...(!editando ? { required: true } : {})}
+                />
+                {errores.password && <div className="invalid-feedback">{errores.password}</div>}
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="passwordConfirm" className="form-label">Confirma contraseña {editando ? '(si cambias)' : '*'}</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="passwordConfirm"
+                  value={formData.passwordConfirm}
+                  onChange={(e) => setFormData({...formData, passwordConfirm: e.target.value})}
+                  {...(!editando ? { required: true } : {})}
+                />
               </div>
 
               <div className="mb-3">
@@ -292,8 +367,9 @@ export default function UsuariosAdmin() {
                 header: 'Rol',
                 render: (r) => (
                   <span
-                    className={`badge admin-badge ${r.rol === 'admin' ? 'admin-badge--success' : 'admin-badge--primary'}`}
+                    className={`badge admin-badge ${r.rol === 'admin' ? 'admin-badge--primary' : 'admin-badge--primary'}`}
                     data-tooltip={r.rol === 'admin' ? 'Usuario con privilegios administrativos' : 'Usuario regular'}
+                    style={{padding: '0.35rem 0.7rem'}}
                   >
                     {r.rol === 'admin' ? 'Administrador' : 'Usuario'}
                   </span>
@@ -306,6 +382,7 @@ export default function UsuariosAdmin() {
                   <span
                     className={`badge admin-badge ${r.activo ? 'admin-badge--success' : 'admin-badge--danger'}`}
                     data-tooltip={r.activo ? 'Usuario activo en el sistema' : 'Usuario desactivado'}
+                    style={{padding: '0.35rem 0.7rem'}}
                   >
                     {r.activo ? 'Activo' : 'Inactivo'}
                   </span>

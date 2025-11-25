@@ -35,6 +35,10 @@ public class UsuarioService {
             String hashed = BCrypt.hashpw(usuario.getPassword(), BCrypt.gensalt());
             usuario.setPassword(hashed);
         }
+        // asegurar valor por defecto para activo
+        if (usuario.getActivo() == null) {
+            usuario.setActivo(true);
+        }
         return usuarioRepository.save(usuario);
     }
 
@@ -43,6 +47,10 @@ public class UsuarioService {
             existing.setNombre(usuario.getNombre());
             existing.setEmail(usuario.getEmail());
             existing.setRol(usuario.getRol());
+            // solo actualizar activo si viene en payload (evitar override accidental)
+            if (usuario.getActivo() != null) {
+                existing.setActivo(usuario.getActivo());
+            }
             if (usuario.getPassword() != null && !usuario.getPassword().isEmpty()) {
                 String hashed = BCrypt.hashpw(usuario.getPassword(), BCrypt.gensalt());
                 existing.setPassword(hashed);

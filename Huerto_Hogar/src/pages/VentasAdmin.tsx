@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Tabla } from '../components/Tabla';
 import { Toast } from '../components/Toast';
 import type { Venta } from '../types/venta';
-import { getVentas } from '../data/storage';
+import ventaService from '../services/ventaService';
 import { FaChartLine, FaShoppingCart, FaDollarSign } from 'react-icons/fa';
 
 export default function VentasAdmin() {
@@ -16,7 +16,26 @@ export default function VentasAdmin() {
 
   // Cargar datos del localStorage al montar el componente
   useEffect(() => {
-    setVentasState(getVentas());
+    (async () => {
+      try {
+        const data = await ventaService.getAll();
+        // mapear estructura devuelta por backend (items) a la interfaz Venta (detalles)
+        const mapped = (data || []).map((v: any) => ({
+          id: String(v.id),
+          fecha: v.fecha || v.fechaVenta || new Date().toISOString(),
+          total: v.total || 0,
+          detalles: (v.items || []).map((it: any) => ({
+            productoId: String(it.productoId || it.producto_id || ''),
+            cantidad: it.cantidad,
+            subtotal: (it.precio || 0) * (it.cantidad || 1),
+            nombre: it.nombre
+          }))
+        }));
+        setVentasState(mapped);
+      } catch (err) {
+        console.error('Error cargando ventas desde API:', err);
+      }
+    })();
   }, []);
   
   const formatearFecha = (fecha: string) => {
