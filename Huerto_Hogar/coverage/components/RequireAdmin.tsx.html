@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for components/productgrid.components.tsx</title>
+    <title>Code coverage report for components/RequireAdmin.tsx</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">components</a> productgrid.components.tsx</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">components</a> RequireAdmin.tsx</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/0</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>0/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
@@ -81,21 +81,17 @@
 <a name='L16'></a><a href='#L16'>16</a>
 <a name='L17'></a><a href='#L17'>17</a>
 <a name='L18'></a><a href='#L18'>18</a>
-<a name='L19'></a><a href='#L19'>19</a>
-<a name='L20'></a><a href='#L20'>20</a>
-<a name='L21'></a><a href='#L21'>21</a>
-<a name='L22'></a><a href='#L22'>22</a>
-<a name='L23'></a><a href='#L23'>23</a>
-<a name='L24'></a><a href='#L24'>24</a>
-<a name='L25'></a><a href='#L25'>25</a>
-<a name='L26'></a><a href='#L26'>26</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L19'></a><a href='#L19'>19</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -103,49 +99,32 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import type { Producto } from "../data/Productos";
-import { CardComponent, CardComponent2 } from "./card.component";
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useContext } from 'react';
+import { Navigate } from 'react-router-dom';
+import { UserContext } from '../context/UserContext';
 &nbsp;
-interface ProductosGridProps {
-    productos: Producto[]
+export function <span class="fstat-no" title="function not covered" >RequireAdmin({</span> children }: { children: JSX.Element }) {
+  const { currentUser <span class="cstat-no" title="statement not covered" >} = useContext(UserContext);</span>
+&nbsp;
+  const isDomainAdmin = <span class="cstat-no" title="statement not covered" >currentUser?.correo?.endsWith('@profesor.duoc.cl');</span>
+  const isRoleAdmin = <span class="cstat-no" title="statement not covered" >currentUser?.rol === 'admin';</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if (!currentUser || !(isDomainAdmin || isRoleAdmin)) {</span>
+<span class="cstat-no" title="statement not covered" >    return &lt;Navigate to="/" replace /&gt;;</span>
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return children;</span>
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >ProductosGrid({</span> productos }: ProductosGridProps) {
-<span class="cstat-no" title="statement not covered" >    return (</span>
-        &lt;div className="row"&gt;
-            {productos.map(<span class="fstat-no" title="function not covered" >(p</span>roducto, index) =&gt; (
-<span class="cstat-no" title="statement not covered" >                &lt;CardComponent key={index} producto={producto} /&gt;</span>
-            ))}
-        &lt;/div&gt;
-    )
-}
-&nbsp;
-export function <span class="fstat-no" title="function not covered" >ProductosGrid2({</span> productos }: ProductosGridProps) {
-<span class="cstat-no" title="statement not covered" >    return (</span>
-        &lt;div className="row"&gt;
-            {productos.map(<span class="fstat-no" title="function not covered" >(p</span>roducto, index) =&gt; (
-<span class="cstat-no" title="statement not covered" >                &lt;CardComponent2 key={index} producto={producto} /&gt;</span>
-            ))}
-        &lt;/div&gt;
-    )
-}</pre></td></tr></table></pre>
+export default RequireAdmin;
+&nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-25T19:50:32.812Z
+                at 2025-11-25T19:50:32.900Z
             </div>
         <script src="../prettify.js"></script>
         <script>
