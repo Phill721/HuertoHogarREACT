@@ -4,7 +4,9 @@ import { Tabla } from '../components/Tabla';
 import { Toast } from '../components/Toast';
 import { Loader } from '../components/Loader';
 import type { Producto } from '../types/producto';
-import { getProductos, setProductos } from '../data/storage';
+// TypeScript may resolve the existing JS module; silence implicit-any import here.
+// @ts-ignore
+import productoService from '../services/productoService';
 
 interface FormData {
   id: string;
@@ -47,14 +49,24 @@ export default function ProductosAdmin() {
 
   // Cargar datos del localStorage al montar el componente
   useEffect(() => {
-    setProductosState(getProductos());
+    (async () => {
+      try {
+        setCargando(true);
+        const data = await productoService.getAll();
+        // adaptar ids a string si vienen como números
+        const mapped = data.map((p: any) => ({ ...p, id: String(p.id) }));
+        setProductosState(mapped);
+      } catch (err) {
+        console.error('Error cargando productos desde API:', err);
+      } finally {
+        setCargando(false);
+      }
+    })();
   }, []);
 
   // Actualizar localStorage cuando cambian los productos
   useEffect(() => {
-    if (productos.length > 0) {
-      setProductos(productos);
-    }
+    // ya no usamos localStorage; opcional: podríamos sincronizar localStorage si lo deseas
   }, [productos]);
 
   const validarFormulario = (): boolean => {
@@ -94,34 +106,31 @@ export default function ProductosAdmin() {
 
     setCargando(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulación de latencia
-
       if (editando) {
-        const nuevosProductos = productos.map(p => 
-          p.id === formData.id ? { ...formData } : p
-        );
-        setProductosState(nuevosProductos);
-        setProductos(nuevosProductos);
-        setNotificacion({
-          mensaje: 'Producto actualizado exitosamente',
-          tipo: 'success'
+        // actualizar en backend
+        const updated = await productoService.update(formData.id, {
+          nombre: formData.nombre,
+          categoria: formData.categoria,
+          precio: formData.precio,
+          stock: formData.stock,
+          descripcion: formData.descripcion,
+          activo: formData.activo
         });
-        // Mostrar alerta adicional para confirmación visible
-        window.alert('Producto actualizado exitosamente');
+        const nuevosProductos = productos.map(p => (String(p.id) === String(updated.id) ? { ...updated, id: String(updated.id) } : p));
+        setProductosState(nuevosProductos);
+        setNotificacion({ mensaje: 'Producto actualizado exitosamente', tipo: 'success' });
       } else {
-        const nuevoProducto = { 
-          ...formData, 
-          id: Date.now().toString() 
-        };
-        const nuevosProductos = [...productos, nuevoProducto];
-        setProductosState(nuevosProductos);
-        setProductos(nuevosProductos);
-        setNotificacion({
-          mensaje: 'Producto agregado exitosamente',
-          tipo: 'success'
+        // crear en backend
+        const created = await productoService.create({
+          nombre: formData.nombre,
+          categoria: formData.categoria,
+          precio: formData.precio,
+          stock: formData.stock,
+          descripcion: formData.descripcion,
+          activo: formData.activo
         });
-        // Mostrar alerta adicional para confirmación visible
-        window.alert('Producto agregado exitosamente');
+        setProductosState([...productos, { ...created, id: String(created.id) }]);
+        setNotificacion({ mensaje: 'Producto agregado exitosamente', tipo: 'success' });
       }
       handleCancelar();
     } catch (error) {
@@ -129,6 +138,7 @@ export default function ProductosAdmin() {
         mensaje: 'Error al procesar la operación',
         tipo: 'error'
       });
+      console.error('Error en handleSubmit productos:', error);
     } finally {
       setCargando(false);
     }
@@ -142,35 +152,23 @@ export default function ProductosAdmin() {
   };
 
   const handleEditar = (producto: Producto) => {
-    setFormData({
-      ...producto,
-      descripcion: producto.descripcion || ''
-    });
+    setFormData({ ...producto, descripcion: producto.descripcion || '' });
     setMostrarFormulario(true);
     setEditando(true);
   };
 
   const handleEliminar = async (producto: Producto) => {
     if (!window.confirm('¿Está seguro de eliminar este producto?')) return;
-
     setCargando(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulación de latencia
-      
-      const nuevosProductos = productos.filter(p => p.id !== producto.id);
+      await productoService.remove(producto.id);
+      const nuevosProductos = productos.filter(p => String(p.id) !== String(producto.id));
       setProductosState(nuevosProductos);
-      setProductos(nuevosProductos);
-      setNotificacion({
-        mensaje: 'Producto eliminado exitosamente',
-        tipo: 'success'
-      });
-      // Mostrar alerta adicional para confirmación visible
+      setNotificacion({ mensaje: 'Producto eliminado exitosamente', tipo: 'success' });
       window.alert('Producto eliminado exitosamente');
     } catch (error) {
-      setNotificacion({
-        mensaje: 'Error al eliminar el producto',
-        tipo: 'error'
-      });
+      console.error('Error al eliminar producto:', error);
+      setNotificacion({ mensaje: 'Error al eliminar el producto', tipo: 'error' });
     } finally {
       setCargando(false);
     }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router';
 import { MOCK_PRODUCTOS, MOCK_USUARIOS, MOCK_VENTAS } from '../data/mock';
 import { FaBox, FaUsers, FaShoppingCart, FaChartLine } from 'react-icons/fa';
 
@@ -149,27 +150,27 @@ export default function Admin() {
             <div className="card-body">
               <h5 className="card-title mb-4">Accesos Rápidos</h5>
               <div className="list-group">
-                <a href="/productos-admin" className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <Link to="/productos-admin" className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                   <div>
                     <FaBox className="me-3" />
                     Gestionar Productos
                   </div>
                   <span className="badge bg-primary rounded-pill">{estadisticas.productos}</span>
-                </a>
-                <a href="/usuarios" className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                </Link>
+                <Link to="/usuarios" className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                   <div>
                     <FaUsers className="me-3" />
                     Gestionar Usuarios
                   </div>
                   <span className="badge bg-primary rounded-pill">{estadisticas.usuarios}</span>
-                </a>
-                <a href="/ventas" className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                </Link>
+                <Link to="/ventas" className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                   <div>
                     <FaShoppingCart className="me-3" />
                     Ver Ventas
                   </div>
                   <span className="badge bg-primary rounded-pill">{estadisticas.ventas}</span>
-                </a>
+                </Link>
               </div>
             </div>
           </div>
