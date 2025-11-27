@@ -1,9 +1,29 @@
 import { Link } from "react-router";
 import { ProductosGrid } from "../components/productgrid.components";
-import { productos } from "../data/Productos";
 import { nodeco } from "../components/navbar.component";
+import productoService from '../services/productoService';
+import { useEffect, useState } from 'react';
+
+type ProductoAny = any;
 
 export function Home(){
+    const [productos, setProductos] = useState<ProductoAny[]>([]);
+    const [cargando, setCargando] = useState(true);
+
+    useEffect(() => {
+        (async () => {
+            setCargando(true);
+            try {
+                const all = await productoService.getAll();
+                setProductos(all || []);
+            } catch (err) {
+                console.error('Error cargando productos en Home:', err);
+            } finally {
+                setCargando(false);
+            }
+        })();
+    }, []);
+
     return(
         <>
             <div className="container-fluid my-2">
@@ -36,7 +56,11 @@ export function Home(){
                 </div>
             </div>
             <div className="row p-3">
-                <ProductosGrid productos={productos.slice(0,3)}/>
+                {cargando ? (
+                    <div className="container">Cargando productos...</div>
+                ) : (
+                    <ProductosGrid productos={productos.slice(0,3)} />
+                )}
             </div>
         </>
     )

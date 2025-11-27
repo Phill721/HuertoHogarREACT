@@ -29,6 +29,16 @@ public class UsuarioService {
         return usuarioRepository.findByEmail(email);
     }
 
+    // Conveniencia: devolver Usuario o null
+    public Usuario findByEmailRaw(String email) {
+        return usuarioRepository.findByEmail(email).orElse(null);
+    }
+
+    public boolean checkPassword(Usuario usuario, String rawPassword) {
+        if (usuario == null || usuario.getPassword() == null) return false;
+        return BCrypt.checkpw(rawPassword, usuario.getPassword());
+    }
+
     public Usuario save(Usuario usuario) {
         // cifrar contraseña antes de guardar
         if (usuario.getPassword() != null && !usuario.getPassword().isEmpty()) {

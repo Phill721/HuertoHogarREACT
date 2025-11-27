@@ -8,6 +8,7 @@ export interface Producto{
     imagen3 : string,
     imagen4 : string
     categoria : Categoria
+    stock?: number
 }
 export enum Categoria{
     FrutasFrescas='Frutas frescas',
@@ -27,6 +28,7 @@ export const productos:Producto[]=[
         imagen3 : '/manzanafuji3.jpg',
         imagen4 : '/manzanafuji4.webp',
         categoria : Categoria.FrutasFrescas
+        ,stock: 12
     },
     {
         id : "fruit2",
@@ -38,6 +40,7 @@ export const productos:Producto[]=[
         imagen3 : '/naranja4.jpg',
         imagen4 : '/naranja1.jpg',
         categoria : Categoria.FrutasFrescas
+        ,stock: 8
     },
     {
         id : "fruit3",
@@ -49,6 +52,7 @@ export const productos:Producto[]=[
         imagen3 : '/banana3.jpeg',
         imagen4 : '/banana4.webp',
         categoria : Categoria.FrutasFrescas
+        ,stock: 20
     },
     {
         id : "verdura1",

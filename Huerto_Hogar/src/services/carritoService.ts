@@ -1,7 +1,10 @@
 const API = 'http://localhost:8080/api/carrito';
 
 async function request(path = '', options: RequestInit = {}) {
-  const res = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...options });
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('access_token') || null;
+  const headers: Record<string,string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(path, { headers, ...options });
   if (!res.ok) {
     const text = await res.text(); throw new Error(`HTTP ${res.status}: ${text}`);
   }

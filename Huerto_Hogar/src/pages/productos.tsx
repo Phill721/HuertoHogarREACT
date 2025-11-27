@@ -76,7 +76,8 @@ export function ProductosPage() {
                         ...p,
                         imagen: p.imagen || p.imagen1 || p.imagenUrl || '/espinaca4.jfif',
                         stock: typeof p.stock === 'number' ? p.stock : (p.cantidad || 0),
-                        categoria: codigo // normalize category to the code used by UI
+                        categoria: codigo, // normalize category to the code used by UI
+                        activo: p.activo == null ? true : !!p.activo
                     };
                 });
                 setProductosApi(mapped as any);
@@ -89,9 +90,11 @@ export function ProductosPage() {
             });
     }, []);
 
+    // Primero ocultar productos inactivos, luego aplicar filtro por categoría si corresponde
+    const activos = productosApi.filter(p => p.activo == null ? true : !!p.activo);
     const productosFiltrados = categoriaSeleccionada === null
-        ? productosApi
-        : productosApi.filter((p) => (p.categoria || '').toLowerCase() === categoriaSeleccionada?.toLowerCase());
+        ? activos
+        : activos.filter((p) => (p.categoria || '').toLowerCase() === categoriaSeleccionada?.toLowerCase());
 
     return (
         <>

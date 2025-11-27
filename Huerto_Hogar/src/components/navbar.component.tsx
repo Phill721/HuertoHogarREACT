@@ -1,7 +1,9 @@
 import { useContext, type CSSProperties } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { UserContext } from "../context/UserContext";
+import { CartContext } from "../context/CartContext";
 import { CarritoModal } from "./modalcart.component";
+import authService from "../services/authService";
 
 export const nodeco: CSSProperties = {
     textDecoration: 'none'
@@ -9,6 +11,8 @@ export const nodeco: CSSProperties = {
 
 export function NavbarComponent() {
     const { currentUser, logout } = useContext(UserContext);
+    const { persistToServer } = useContext(CartContext);
+    const navigate = useNavigate();
 
     // 👉 Validación: ¿es admin? (usar rol si está disponible, fallback por correo)
     const isAdmin = (currentUser as any)?.rol === 'admin' || currentUser?.correo === 'admin@gmail.com';
@@ -117,7 +121,26 @@ export function NavbarComponent() {
                                         <li>
                                             <button
                                                 className="dropdown-item text-danger"
-                                                onClick={logout}
+                                                onClick={async () => {
+                                                    // Persistir carrito en backend (si corresponde) ANTES de remover token
+                                                    try {
+                                                        if (persistToServer) await persistToServer();
+                                                    } catch (e) {
+                                                        console.error('Error al persistir carrito antes de logout', e);
+                                                    }
+
+                                                    // limpiar token axios/localStorage
+                                                    try { authService.logout(); } catch (e) { /* ignore */ }
+
+                                                    // limpiar contexto de usuario y emitir evento de logout
+                                                    logout();
+
+                                                    // mostrar mensaje al usuario
+                                                    try { alert('Has cerrado sesión'); } catch (e) { }
+
+                                                    // navegar a la página principal
+                                                    navigate('/');
+                                                }}
                                             >
                                                 Cerrar sesión
                                             </button>

@@ -17,6 +17,7 @@ type CartContextType = {
     clearCart: () => void;
     updateQuantity: (id: string, cantidad: number) => void;
     total: number;
+    persistToServer: () => Promise<void>;
 };
 
 export const CartContext = createContext<CartContextType>({
@@ -26,6 +27,7 @@ export const CartContext = createContext<CartContextType>({
     clearCart: () => { },
     updateQuantity: () => { },
     total: 0,
+    persistToServer: async () => { },
 });
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -48,6 +50,96 @@ export function CartProvider({ children }: { children: ReactNode }) {
         };
         window.addEventListener("storage", syncCart);
         return () => window.removeEventListener("storage", syncCart);
+    }, []);
+
+    // Escuchar eventos globales de login/logout para sincronizar carrito con backend
+    useEffect(() => {
+        const onUserLogin = async (ev: Event) => {
+            try {
+                const detail: any = (ev as CustomEvent).detail || {};
+                const correo = detail?.correo;
+                if (!correo) return;
+
+                // Obtener usuario para conocer su id
+                const usuarios = await usuarioService.getAll();
+                const usuario = usuarios.find((u: any) => {
+                    const e = (u.email || u.correo || '').toLowerCase();
+                    return e === String(correo).toLowerCase();
+                });
+                if (!usuario) {
+                    setCart([]);
+                    return;
+                }
+
+                // Obtener carrito desde backend y reemplazar el local
+                const serverCart: any[] = await carritoService.getCart(usuario.id);
+                if (!serverCart || !Array.isArray(serverCart)) {
+                    setCart([]);
+                    return;
+                }
+
+                const mapped = serverCart.map((it: any) => ({
+                    id: String(it.productoId ?? it.producto?.id ?? it.id ?? ''),
+                    nombre: it.nombre ?? it.producto?.nombre ?? '',
+                    precio: Number(it.precio ?? it.producto?.precio ?? 0),
+                    imagen: it.imagen ?? (it.producto && (it.producto.imagen || '')) ?? '',
+                    cantidad: Number(it.cantidad ?? 0)
+                }));
+
+                setCart(mapped);
+            } catch (err) {
+                console.error('Error sincronizando carrito tras login:', err);
+            }
+        };
+
+        const onUserLogout = () => {
+            // Al cerrar sesión, limpiar carrito local para evitar mezcla entre usuarios
+            setCart([]);
+        };
+
+        window.addEventListener('user-logged-in', onUserLogin as EventListener);
+        window.addEventListener('user-logged-out', onUserLogout);
+
+        return () => {
+            window.removeEventListener('user-logged-in', onUserLogin as EventListener);
+            window.removeEventListener('user-logged-out', onUserLogout);
+        };
+    }, []);
+
+    // Al montar, si ya hay un usuario guardado (sesión persistente), sincronizar su carrito
+    useEffect(() => {
+        (async () => {
+            try {
+                const storedUser = localStorage.getItem('currentUser');
+                if (!storedUser) return;
+                const parsed = JSON.parse(storedUser || '{}');
+                const correo = parsed?.correo || parsed?.email || parsed?.user;
+                if (!correo) return;
+
+                const usuarios = await usuarioService.getAll();
+                const usuario = usuarios.find((u: any) => {
+                    const e = (u.email || u.correo || '').toLowerCase();
+                    return e === String(correo).toLowerCase();
+                });
+                if (!usuario) return;
+
+                const serverCart: any[] = await carritoService.getCart(usuario.id);
+                if (!serverCart || !Array.isArray(serverCart)) return;
+
+                const mapped = serverCart.map((it: any) => ({
+                    id: String(it.productoId ?? it.producto?.id ?? it.id ?? ''),
+                    nombre: it.nombre ?? it.producto?.nombre ?? '',
+                    precio: Number(it.precio ?? it.producto?.precio ?? 0),
+                    imagen: it.imagen ?? (it.producto && (it.producto.imagen || '')) ?? '',
+                    cantidad: Number(it.cantidad ?? 0)
+                }));
+
+                setCart(mapped);
+            } catch (err) {
+                // no bloquear si falla la sincronización inicial
+                console.error('Error sincronizando carrito al iniciar la aplicación:', err);
+            }
+        })();
     }, []);
 
     const addToCart = (item: CartItem) => {
@@ -234,9 +326,48 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     return (
         <CartContext.Provider
-            value={{ cart, addToCart, removeFromCart, clearCart, updateQuantity, total }}
+            value={{ cart, addToCart, removeFromCart, clearCart, updateQuantity, total, persistToServer }}
         >
             {children}
         </CartContext.Provider>
     );
+}
+
+async function persistToServer() {
+    try {
+        console.log('persistToServer: starting persist of local cart to server...');
+        const stored = localStorage.getItem('currentUser');
+        if (!stored) return;
+        const parsed = JSON.parse(stored || '{}');
+        const correo = parsed?.correo || parsed?.email || parsed?.user;
+        if (!correo) return;
+        const usuarios = await usuarioService.getAll();
+        const usuario = usuarios.find((u: any) => {
+            const e = (u.email || u.correo || '').toLowerCase();
+            return e === String(correo).toLowerCase();
+        });
+        if (!usuario) return;
+
+        // Obtener cart actual desde localStorage para persistir (en caso el state haya cambiado)
+        const storedCart = localStorage.getItem('cart');
+        const currentCart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
+        if (!currentCart.length) { console.log('persistToServer: cart empty, nothing to persist'); return; }
+
+        // Enviar cada item al backend (cantidad positiva)
+        for (const item of currentCart) {
+            try {
+                const resp = await carritoService.addItem(usuario.id, {
+                    productoId: String(item.id),
+                    nombre: item.nombre,
+                    precio: item.precio,
+                    cantidad: item.cantidad,
+                });
+                console.log('persistToServer: added item to server cart', item, resp);
+            } catch (err) {
+                console.error('Error persisting cart item on logout:', err);
+            }
+        }
+    } catch (err) {
+        console.error('Error persisting cart to server:', err);
+    }
 }

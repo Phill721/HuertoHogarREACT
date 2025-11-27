@@ -39,14 +39,26 @@ export function DetalleProducto() {
                 const slug = String(nombre || '').toLowerCase();
                 const found = (all as any[]).find((p: any) => String(p.nombre).toLowerCase().replace(/\s+/g, "-") === slug);
                 if (found) {
-                    // normalizar imagen y stock
-                    const normalized = {
-                        ...found,
-                        imagen: (found as any).imagen || (found as any).imagen1 || '/espinaca4.jfif',
-                        stock: typeof (found as any).stock === 'number' ? (found as any).stock : ((found as any).cantidad || 0)
-                    } as ProductoAPI;
-                    setProducto(normalized);
-                    setImagenPrincipal(normalized.imagen);
+                    // Solicitar la versión exacta del producto por id para asegurar stock actualizado
+                    try {
+                        const fresh = await productoService.getById(found.id ?? found.idProducto ?? found.productoId ?? found.id);
+                        const normalized = {
+                            ...fresh,
+                            imagen: (fresh as any).imagen || (fresh as any).imagen1 || '/espinaca4.jfif',
+                            stock: typeof (fresh as any).stock === 'number' ? (fresh as any).stock : ((fresh as any).cantidad || 0)
+                        } as ProductoAPI;
+                        setProducto(normalized);
+                        setImagenPrincipal(normalized.imagen);
+                    } catch (err) {
+                        // si falla getById, usar el found inicial como fallback
+                        const normalized = {
+                            ...found,
+                            imagen: (found as any).imagen || (found as any).imagen1 || '/espinaca4.jfif',
+                            stock: typeof (found as any).stock === 'number' ? (found as any).stock : ((found as any).cantidad || 0)
+                        } as ProductoAPI;
+                        setProducto(normalized);
+                        setImagenPrincipal(normalized.imagen);
+                    }
                 }
             } catch (err) {
                 console.error('Error cargando producto desde API:', err);
@@ -166,6 +178,16 @@ export function DetalleProducto() {
                     <div className="col-md-6">
                         <h2>{producto.nombre}</h2>
                         <h5>Precio: ${producto.precio.toLocaleString()}</h5>
+                        {/* Mostrar stock del producto */}
+                        <div className="mb-2">
+                            {typeof producto.stock === 'number' ? (
+                                <span className={`badge ${producto.stock <= 5 ? 'bg-danger' : 'bg-success'}`}>
+                                    Stock: {producto.stock}
+                                </span>
+                            ) : (
+                                <span className="text-muted">Stock: desconocido</span>
+                            )}
+                        </div>
                         <hr />
                         <p>{producto.descripcion}</p>
                         <hr />

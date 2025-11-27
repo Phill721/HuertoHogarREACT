@@ -11,8 +11,11 @@ export type UsuarioResponse = UsuarioPayload & { id: number };
 const API = 'http://localhost:8080/api/usuarios';
 
 async function request(path = '', options: RequestInit = {}) {
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('access_token') || null;
+  const headers: Record<string,string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(path, {
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     ...options,
   });
   if (!res.ok) {

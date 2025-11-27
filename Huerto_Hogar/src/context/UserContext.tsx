@@ -30,11 +30,21 @@ export function UserProvider({ children }: { children: ReactNode }) {
         const data: UserData = { user, correo, rol };
         localStorage.setItem("currentUser", JSON.stringify(data));
         setCurrentUser(data);
+        // Emitir evento global para que otros contextos (ej. carrito) sincronicen
+        try {
+            window.dispatchEvent(new CustomEvent('user-logged-in', { detail: { correo } }));
+        } catch (e) {
+            // en entornos sin CustomEvent (muy antiguos) ignorar
+        }
     };
 
     const logout = () => {
         localStorage.removeItem("currentUser");
         setCurrentUser(null);
+        // Emitir evento de logout para que otros contextos (ej. carrito) limpien/ajusten
+        try {
+            window.dispatchEvent(new Event('user-logged-out'));
+        } catch (e) { }
     };
 
     return (

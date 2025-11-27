@@ -3,6 +3,7 @@ import { useNavigate } from "react-router"; // 👈 import para navegar
 import { ModalComponent } from "../components/modal.component";
 import { Button, TextBox } from "../components/input.component";
 import usuarioService from '../services/usuarioService';
+import authService from '../services/authService';
 import { UserContext } from "../context/UserContext"; // 👈 import del contexto
 
 export function Login() {
@@ -43,9 +44,27 @@ export function Login() {
         }
 
         try {
-            const foundUser = await usuarioService.login(correo, contraseña);
-            // Guardar usuario actual usando el contexto (usar email del backend)
-            login(foundUser.nombre || foundUser.email || correo, foundUser.email || correo, (foundUser.rol as any) ?? 'user');
+            // Primero autenticar y obtener token (si el backend devuelve token en /api/auth/login)
+            let authResp: any = null;
+            try {
+                authResp = await authService.login(correo, contraseña);
+            } catch (e) {
+                // Si no existe endpoint de auth o falla, seguiremos con usuarioService.login
+                console.warn('authService.login falló, intentando usuarioService.login como fallback', e);
+            }
+
+            // Obtener datos completos del usuario (nombre/rol) desde la API de usuarios
+            const usuarios = await usuarioService.getAll();
+            const emailToMatch = (authResp && authResp.email) ? authResp.email : correo;
+            const foundUser = usuarios.find((u: any) => ((u.email || u.correo || '').toLowerCase() === String(emailToMatch).toLowerCase()));
+            if (!foundUser) {
+                // fallback: intentar login por credenciales para obtener user data
+                const fromLogin = await usuarioService.login(correo, contraseña);
+                login(fromLogin.nombre || fromLogin.email || correo, fromLogin.email || correo, (fromLogin.rol as any) ?? 'user');
+            } else {
+                // Guardar usuario actual usando el contexto (usar email del backend)
+                login(foundUser.nombre || foundUser.email || correo, foundUser.email || correo, (foundUser.rol as any) ?? 'user');
+            }
 
             // Mostrar modal de éxito
             setModalTitle("Bienvenido 🌿");
