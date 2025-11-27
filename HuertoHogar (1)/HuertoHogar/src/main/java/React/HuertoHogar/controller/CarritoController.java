@@ -22,18 +22,31 @@ public class CarritoController {
 
     @GetMapping("/{usuarioId}")
     public ResponseEntity<Carrito> getCart(@PathVariable Long usuarioId) {
-        return ResponseEntity.ok(carritoService.getOrCreateCart(usuarioId));
+        try {
+            return ResponseEntity.ok(carritoService.getOrCreateCart(usuarioId));
+        } catch (RuntimeException ex) {
+            // Por ejemplo: Usuario no encontrado
+            return ResponseEntity.status(404).body(null);
+        }
     }
 
     @PostMapping("/{usuarioId}/items")
     public ResponseEntity<Carrito> addItem(@PathVariable Long usuarioId, @RequestBody CarritoItem item) {
-        return ResponseEntity.ok(carritoService.addItem(usuarioId, item));
+        try {
+            return ResponseEntity.ok(carritoService.addItem(usuarioId, item));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(404).body(null);
+        }
     }
 
     @DeleteMapping("/{usuarioId}/items/{itemId}")
     public ResponseEntity<Void> removeItem(@PathVariable Long usuarioId, @PathVariable Long itemId) {
-        carritoService.removeItem(usuarioId, itemId);
-        return ResponseEntity.noContent().build();
+        try {
+            carritoService.removeItem(usuarioId, itemId);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(404).build();
+        }
     }
 
     @PostMapping("/{usuarioId}/checkout")
