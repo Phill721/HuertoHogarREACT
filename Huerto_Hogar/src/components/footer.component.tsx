@@ -34,7 +34,7 @@ export function FooterComponent(){
                         <ul className="list-unstyled mb-0">
                             <li>
                                 <a
-                                    onClick={() => handleCategoryClick("Frutas frescas")}
+                                    onClick={() => handleCategoryClick("frutas")}
                                     className="text-white text-decoration-none"
                                     role="button"
                                 >
@@ -43,7 +43,7 @@ export function FooterComponent(){
                             </li>
                             <li>
                                 <a
-                                    onClick={() => handleCategoryClick("Verduras Organicas")}
+                                    onClick={() => handleCategoryClick("verduras")}
                                     className="text-white text-decoration-none"
                                     role="button"
                                 >
@@ -52,7 +52,7 @@ export function FooterComponent(){
                             </li>
                             <li>
                                 <a
-                                    onClick={() => handleCategoryClick("Productos Organicos")}
+                                    onClick={() => handleCategoryClick("organicos")}
                                     className="text-white text-decoration-none"
                                     role="button"
                                 >
@@ -61,7 +61,7 @@ export function FooterComponent(){
                             </li>
                             <li>
                                 <a
-                                    onClick={() => handleCategoryClick("Productos Lacteos")}
+                                    onClick={() => handleCategoryClick("lacteos")}
                                     className="text-white text-decoration-none"
                                     role="button"
                                 >

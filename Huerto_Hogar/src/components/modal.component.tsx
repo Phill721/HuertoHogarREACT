@@ -1,13 +1,15 @@
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 
 interface ModalProps {
     title: string;
-    message: string;
+    message?: ReactNode;
     show: boolean;
     onClose: () => void;
+    children?: ReactNode;
+    size?: 'sm' | 'md' | 'lg';
 }
 
-export function ModalComponent({ title, message, show, onClose }: ModalProps) {
+export function ModalComponent({ title, message, show, onClose, children, size = 'md' }: ModalProps) {
     useEffect(() => {
         if (show) document.body.classList.add("modal-open");
         else document.body.classList.remove("modal-open");
@@ -23,7 +25,7 @@ export function ModalComponent({ title, message, show, onClose }: ModalProps) {
                 tabIndex={-1}
                 role="dialog"
             >
-                <div className="modal-dialog modal-dialog-centered" role="document">
+                <div className={`modal-dialog modal-dialog-centered ${size === 'sm' ? 'modal-sm' : size === 'lg' ? 'modal-lg' : ''}`} role="document">
                     <div className="modal-content shadow-lg border-0">
                         <div
                             className="modal-header text-white"
@@ -37,7 +39,8 @@ export function ModalComponent({ title, message, show, onClose }: ModalProps) {
                             ></button>
                         </div>
                         <div className="modal-body">
-                            <p className="mb-0">{message}</p>
+                            {message ? <div className="mb-0">{message}</div> : null}
+                            {children}
                         </div>
                         <div className="modal-footer">
                             <button

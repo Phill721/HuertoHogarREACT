@@ -1,11 +1,14 @@
 package React.HuertoHogar.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "carritos")
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 public class Carrito {
 
     @Id
@@ -16,7 +19,8 @@ public class Carrito {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<CarritoItem> items = new ArrayList<>();
 
     public Carrito() {}

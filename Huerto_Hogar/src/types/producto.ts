@@ -7,4 +7,8 @@ export interface Producto {
   stock: number;
   descripcion?: string;
   activo: boolean;
+  imagen?: string | null;
+  imagen2?: string | null;
+  imagen3?: string | null;
+  imagen4?: string | null;
 }

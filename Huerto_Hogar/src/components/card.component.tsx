@@ -1,9 +1,21 @@
 import { Link } from "react-router"
-import type { Producto } from "../data/Productos"
 import { nodeco } from "./navbar.component"
 
+type ProductoDisplay = {
+    id: string | number;
+    nombre: string;
+    descripcion?: string;
+    precio: number;
+    imagen: string;
+    imagen2?: string;
+    imagen3?: string;
+    imagen4?: string;
+    categoria?: string;
+    stock?: number;
+}
+
 interface CardProps{
-    producto : Producto
+    producto : ProductoDisplay
 }
 // Este primer componente es para que la card sea mas grande, para productos destacados en home por ejemplo
 export function CardComponent({ producto }: CardProps){
@@ -15,7 +27,16 @@ export function CardComponent({ producto }: CardProps){
                     <div className="card-body d-flex flex-column">
                         <h4 className="card-title main-text">{producto.nombre}</h4>
                         <p className="card-text main-text">{producto.descripcion}</p>
-                        <Link to={`/productos/${producto.id}`} style={{...nodeco, display: "block"}} className="btn mt-auto main-text btn-buy">Comprar: ${producto.precio.toLocaleString()}</Link>
+                        <div className="mt-2">
+                            {typeof producto.stock === 'number' ? (
+                                <div className={`mb-2 ${producto.stock > 0 ? 'text-success' : 'text-danger'}`}>
+                                    Stock: {producto.stock}
+                                </div>
+                            ) : null}
+                            <Link to={`/productos/${String(producto.nombre).toLowerCase().replace(/\s+/g, "-")}`} style={{...nodeco, display: "block"}} className={`btn mt-auto main-text btn-buy ${producto.stock === 0 ? 'disabled' : ''}`}>
+                                {producto.stock === 0 ? 'Agotado' : `Comprar: $${producto.precio.toLocaleString()}`}
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -33,7 +54,16 @@ export function CardComponent2({ producto }: CardProps){
                     <div className="card-body d-flex flex-column">
                         <h4 className="card-title main-text">{producto.nombre}</h4>
                         <p className="card-text main-text">{producto.descripcion}</p>
-                        <Link to={`/productos/${producto.id}`} style={{...nodeco, display: "block"}} className="btn mt-auto main-text btn-buy">Comprar: ${producto.precio.toLocaleString()}</Link>
+                        <div className="mt-2">
+                            {typeof producto.stock === 'number' ? (
+                                <div className={`mb-2 ${producto.stock > 0 ? 'text-success' : 'text-danger'}`}>
+                                    Stock: {producto.stock}
+                                </div>
+                            ) : null}
+                            <Link to={`/productos/${String(producto.nombre).toLowerCase().replace(/\s+/g, "-")}`} style={{...nodeco, display: "block"}} className={`btn mt-auto main-text btn-buy ${producto.stock === 0 ? 'disabled' : ''}`}>
+                                {producto.stock === 0 ? 'Agotado' : `Comprar: $${producto.precio.toLocaleString()}`}
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

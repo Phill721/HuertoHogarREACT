@@ -101,15 +101,15 @@ export default function UsuariosAdmin() {
     // Validación de contraseña: si estamos creando (no editando) requiere contraseña;
     // si estamos editando, la contraseña es opcional, pero si se ingresa debe coincidir con la confirmación
     if (!editando) {
-      if (!formData.password || formData.password.length < 6) {
-        nuevosErrores.password = 'La contraseña es requerida (mínimo 6 caracteres)';
+      if (!formData.password || formData.password.length < 5) {
+        nuevosErrores.password = 'La contraseña es requerida (mínimo 5 caracteres)';
       } else if (formData.password !== formData.passwordConfirm) {
         nuevosErrores.password = 'Las contraseñas no coinciden';
       }
     } else {
       if (formData.password && formData.password.length > 0) {
-        if (formData.password.length < 6) {
-          nuevosErrores.password = 'La contraseña debe tener al menos 6 caracteres';
+        if (formData.password.length < 5) {
+          nuevosErrores.password = 'La contraseña debe tener al menos 5 caracteres';
         } else if (formData.password !== formData.passwordConfirm) {
           nuevosErrores.password = 'Las contraseñas no coinciden';
         }

@@ -1,5 +1,7 @@
 package React.HuertoHogar.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -7,13 +9,14 @@ import java.util.List;
 
 @Entity
 @Table(name = "ventas")
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 public class Venta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
@@ -23,7 +26,8 @@ public class Venta {
     @Column(nullable = false)
     private Double total = 0.0;
 
-    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<VentaItem> items = new ArrayList<>();
 
     public Venta() {}

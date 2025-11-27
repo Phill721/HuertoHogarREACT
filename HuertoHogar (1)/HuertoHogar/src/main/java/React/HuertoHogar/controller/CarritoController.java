@@ -2,9 +2,11 @@ package React.HuertoHogar.controller;
 
 import React.HuertoHogar.model.Carrito;
 import React.HuertoHogar.model.CarritoItem;
+import React.HuertoHogar.dto.VentaItemDTO;
 import React.HuertoHogar.model.Venta;
 import React.HuertoHogar.service.CarritoService;
 import org.springframework.http.ResponseEntity;
+import React.HuertoHogar.exception.InsufficientStockException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,8 +37,21 @@ public class CarritoController {
     }
 
     @PostMapping("/{usuarioId}/checkout")
-    public ResponseEntity<Venta> checkout(@PathVariable Long usuarioId) {
-        Venta v = carritoService.checkout(usuarioId);
-        return ResponseEntity.ok(v);
+    public ResponseEntity<?> checkout(@PathVariable Long usuarioId, @RequestBody(required = false) java.util.List<VentaItemDTO> items) {
+        try {
+            Venta v;
+            if (items != null && !items.isEmpty()) {
+                v = carritoService.checkoutWithItems(usuarioId, items);
+            } else {
+                v = carritoService.checkout(usuarioId);
+            }
+            return ResponseEntity.ok(v);
+        } catch (InsufficientStockException ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(400).body(java.util.Map.of("error", ex.getMessage()));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(500).body(java.util.Map.of("error", ex.getMessage()));
+        }
     }
 }

@@ -2,12 +2,15 @@
 import { useState, useEffect } from 'react';
 import { Tabla } from '../components/Tabla';
 import { Toast } from '../components/Toast';
+import { ModalComponent } from '../components/modal.component';
 import type { Venta } from '../types/venta';
 import ventaService from '../services/ventaService';
 import { FaChartLine, FaShoppingCart, FaDollarSign } from 'react-icons/fa';
 
 export default function VentasAdmin() {
   const [ventas, setVentasState] = useState<Venta[]>([]);
+  const [selectedVenta, setSelectedVenta] = useState<Venta | null>(null);
+  const [showDetalleModal, setShowDetalleModal] = useState(false);
   const [filtroFecha, setFiltroFecha] = useState<'hoy' | 'semana' | 'mes' | 'todo'>('todo');
   const [notificacion, setNotificacion] = useState<{
     mensaje: string;
@@ -24,6 +27,7 @@ export default function VentasAdmin() {
           id: String(v.id),
           fecha: v.fecha || v.fechaVenta || new Date().toISOString(),
           total: v.total || 0,
+          clienteNombre: (v.usuario && (v.usuario.nombre || v.usuario.email)) || v.clienteNombre || '',
           detalles: (v.items || []).map((it: any) => ({
             productoId: String(it.productoId || it.producto_id || ''),
             cantidad: it.cantidad,
@@ -230,41 +234,19 @@ export default function VentasAdmin() {
                 render: (r) => formatearPrecio(r.total),
                 className: 'text-end'
               },
+              { key: 'clienteNombre', header: 'Cliente', render: (r) => r.clienteNombre || '-' },
               {
                 key: 'detalles',
                 header: 'Detalles',
                 render: (r) => (
-                  <div className="dropdown">
-                    <button 
-                      className="btn btn-sm btn-outline-secondary dropdown-toggle"
+                  <div>
+                    <button
+                      className="btn btn-sm btn-outline-secondary"
                       type="button"
-                      data-bs-toggle="dropdown"
-                      aria-expanded="false"
+                      onClick={() => { setSelectedVenta(r); setShowDetalleModal(true); }}
                     >
                       Ver Detalles
                     </button>
-                    <ul className="dropdown-menu dropdown-menu-end p-3" style={{ minWidth: '300px' }}>
-                      <li className="px-2 py-1">
-                        <h6 className="mb-2 text-muted">Productos en esta venta:</h6>
-                        {r.detalles.map((detalle, index) => (
-                          <div key={index} className="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                              <span className="fw-bold">{detalle.cantidad}x</span> {detalle.nombre}
-                            </div>
-                            <span className="text-end ms-3">
-                              {formatearPrecio(detalle.subtotal)}
-                            </span>
-                          </div>
-                        ))}
-                        <hr className="my-2" />
-                        <div className="d-flex justify-content-between align-items-center">
-                          <strong>Total:</strong>
-                          <span className="text-success fw-bold">
-                            {formatearPrecio(r.total)}
-                          </span>
-                        </div>
-                      </li>
-                    </ul>
                   </div>
                 ),
                 className: 'text-center'
@@ -280,6 +262,35 @@ export default function VentasAdmin() {
           type={notificacion.tipo}
           onClose={() => setNotificacion(null)}
         />
+      )}
+                {showDetalleModal && selectedVenta && (
+        <ModalComponent
+          show={showDetalleModal}
+          title={`Detalle Venta #${selectedVenta.id}`}
+          onClose={() => { setShowDetalleModal(false); setSelectedVenta(null); }}
+          size="sm"
+        >
+          <div className="px-2 py-1">
+            <h6 className="mb-2 text-muted">Productos en esta venta:</h6>
+            {selectedVenta.detalles?.map((detalle, index) => (
+              <div key={index} className="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                  <span className="fw-bold">{detalle.cantidad}x</span> {detalle.nombre}
+                </div>
+                <span className="text-end ms-3">
+                  {formatearPrecio(detalle.subtotal)}
+                </span>
+              </div>
+            ))}
+            <hr className="my-2" />
+            <div className="d-flex justify-content-between align-items-center">
+              <strong>Total:</strong>
+              <span className="text-success fw-bold">
+                {formatearPrecio(selectedVenta.total)}
+              </span>
+            </div>
+          </div>
+        </ModalComponent>
       )}
     </div>
   );

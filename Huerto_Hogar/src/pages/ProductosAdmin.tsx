@@ -4,9 +4,8 @@ import { Tabla } from '../components/Tabla';
 import { Toast } from '../components/Toast';
 import { Loader } from '../components/Loader';
 import type { Producto } from '../types/producto';
-// TypeScript may resolve the existing JS module; silence implicit-any import here.
-// @ts-ignore
 import productoService from '../services/productoService';
+import axios from 'axios';
 
 interface FormData {
   id: string;
@@ -41,6 +40,8 @@ export default function ProductosAdmin() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [editando, setEditando] = useState(false);
   const [errores, setErrores] = useState<FormErrors>({});
+  const [images, setImages] = useState<(File | null)[]>([null, null, null, null]);
+  const [imagesPreview, setImagesPreview] = useState<(string | null)[]>([null, null, null, null]);
   const [cargando, setCargando] = useState(false);
   const [notificacion, setNotificacion] = useState<{
     mensaje: string;
@@ -53,8 +54,21 @@ export default function ProductosAdmin() {
       try {
         setCargando(true);
         const data = await productoService.getAll();
-        // adaptar ids a string si vienen como números
-        const mapped = data.map((p: any) => ({ ...p, id: String(p.id) }));
+        // adaptar ids a string y validar categorías permitidas
+        const allowed = ['frutas', 'verduras', 'organicos', 'lacteos'];
+        const mapped: Producto[] = data.map((p: any) => ({
+          id: String(p.id),
+          nombre: p.nombre,
+          categoria: allowed.includes(p.categoria) ? p.categoria : 'verduras',
+          precio: Number(p.precio) || 0,
+          stock: Number(p.stock) || 0,
+          descripcion: p.descripcion,
+          activo: p.activo == null ? true : !!p.activo,
+          imagen: p.imagen || null,
+          imagen2: p.imagen2 || null,
+          imagen3: p.imagen3 || null,
+          imagen4: p.imagen4 || null,
+        }));
         setProductosState(mapped);
       } catch (err) {
         console.error('Error cargando productos desde API:', err);
@@ -94,6 +108,7 @@ export default function ProductosAdmin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('[ProductosAdmin] handleSubmit start', { editando, formData, images });
     if (!validarFormulario()) return;
     // Confirmar antes de agregar o actualizar
     if (editando) {
@@ -107,8 +122,9 @@ export default function ProductosAdmin() {
     setCargando(true);
     try {
       if (editando) {
-        // actualizar en backend
-        const updated = await productoService.update(formData.id, {
+        // actualizar en backend (primero datos)
+        console.log('[ProductosAdmin] calling update (data only) with images pending:', images);
+        let updated = await productoService.update(formData.id, {
           nombre: formData.nombre,
           categoria: formData.categoria,
           precio: formData.precio,
@@ -116,11 +132,50 @@ export default function ProductosAdmin() {
           descripcion: formData.descripcion,
           activo: formData.activo
         });
-        const nuevosProductos = productos.map(p => (String(p.id) === String(updated.id) ? { ...updated, id: String(updated.id) } : p));
+        console.log('[ProductosAdmin] update (data) result:', updated);
+        // Si existen archivos seleccionados, subir imágenes en una segunda petición
+        const hasFiles = images.some(f => f instanceof File && f != null);
+        if (hasFiles) {
+          console.log('[ProductosAdmin] uploading images for product', updated.id, images);
+          try {
+            if (typeof (productoService as any).uploadImages === 'function') {
+              const withImgs = await (productoService as any).uploadImages(updated.id, images);
+              console.log('[ProductosAdmin] uploadImages result:', withImgs);
+              updated = { ...updated, ...(withImgs as any) };
+            } else {
+              // fallback: post FormData directly with axios
+              const form = new FormData();
+              if (images[0]) form.append('imagen', images[0] as File);
+              if (images[1]) form.append('imagen2', images[1] as File);
+              if (images[2]) form.append('imagen3', images[2] as File);
+              if (images[3]) form.append('imagen4', images[3] as File);
+              const resp = await axios.post(`http://localhost:8080/api/productos/${updated.id}/imagenes`, form);
+              console.log('[ProductosAdmin] axios uploadImages result', resp.status, resp.data);
+              updated = { ...updated, ...(resp.data as any) };
+            }
+          } catch (e) {
+            console.error('Error subiendo imágenes:', e);
+          }
+        }
+        const nuevosProductos = productos.map(p => (String(p.id) === String(updated.id) ? {
+          id: String(updated.id),
+          nombre: updated.nombre,
+          categoria: (['frutas','verduras','organicos','lacteos'].includes(updated.categoria) ? updated.categoria : 'verduras') as Producto['categoria'],
+          precio: Number(updated.precio) || 0,
+          stock: Number(updated.stock) || 0,
+          descripcion: updated.descripcion,
+          activo: updated.activo == null ? true : !!updated.activo,
+          imagen: updated.imagen || null,
+          imagen2: updated.imagen2 || null,
+          imagen3: updated.imagen3 || null,
+          imagen4: updated.imagen4 || null,
+        } : p));
         setProductosState(nuevosProductos);
         setNotificacion({ mensaje: 'Producto actualizado exitosamente', tipo: 'success' });
+        window.alert('Producto actualizado exitosamente');
       } else {
-        // crear en backend
+        // crear en backend: primero crear el producto (JSON), luego subir imágenes si hay archivos
+        console.log('[ProductosAdmin] creating product (data only), images pending:', images);
         const created = await productoService.create({
           nombre: formData.nombre,
           categoria: formData.categoria,
@@ -129,8 +184,49 @@ export default function ProductosAdmin() {
           descripcion: formData.descripcion,
           activo: formData.activo
         });
-        setProductosState([...productos, { ...created, id: String(created.id) }]);
+        console.log('[ProductosAdmin] product created (data):', created);
+
+        // Si existen archivos seleccionados, subir imágenes en una segunda petición
+        const hasFiles = images.some(f => f instanceof File && f != null);
+        let finalCreated = created as any;
+        if (hasFiles) {
+          console.log('[ProductosAdmin] uploading images for new product', created.id, images);
+          try {
+            if (typeof (productoService as any).uploadImages === 'function') {
+              const withImgs = await (productoService as any).uploadImages(created.id, images);
+              console.log('[ProductosAdmin] uploadImages result:', withImgs);
+              finalCreated = { ...finalCreated, ...(withImgs as any) };
+            } else {
+              const form = new FormData();
+              if (images[0]) form.append('imagen', images[0] as File);
+              if (images[1]) form.append('imagen2', images[1] as File);
+              if (images[2]) form.append('imagen3', images[2] as File);
+              if (images[3]) form.append('imagen4', images[3] as File);
+              const resp = await axios.post(`http://localhost:8080/api/productos/${created.id}/imagenes`, form);
+              console.log('[ProductosAdmin] axios uploadImages result', resp.status, resp.data);
+              finalCreated = { ...finalCreated, ...(resp.data as any) };
+            }
+          } catch (e) {
+            console.error('Error subiendo imágenes al crear producto:', e);
+          }
+        }
+
+        const nuevo: Producto = {
+          id: String(finalCreated.id),
+          nombre: finalCreated.nombre,
+          categoria: (['frutas','verduras','organicos','lacteos'].includes(finalCreated.categoria) ? finalCreated.categoria : 'verduras') as Producto['categoria'],
+          precio: Number(finalCreated.precio) || 0,
+          stock: Number(finalCreated.stock) || 0,
+          descripcion: finalCreated.descripcion,
+          activo: finalCreated.activo == null ? true : !!finalCreated.activo,
+          imagen: finalCreated.imagen || null,
+          imagen2: finalCreated.imagen2 || null,
+          imagen3: finalCreated.imagen3 || null,
+          imagen4: finalCreated.imagen4 || null,
+        };
+        setProductosState([...productos, nuevo]);
         setNotificacion({ mensaje: 'Producto agregado exitosamente', tipo: 'success' });
+        window.alert('Producto agregado exitosamente');
       }
       handleCancelar();
     } catch (error) {
@@ -139,9 +235,29 @@ export default function ProductosAdmin() {
         tipo: 'error'
       });
       console.error('Error en handleSubmit productos:', error);
+      // if it's an Axios error show response
+      try { console.error('error.response', (error as any).response); } catch (e) {}
     } finally {
       setCargando(false);
     }
+  };
+
+  const handleImageChange = (index: number, file?: File | null) => {
+    const copia = [...images];
+    const copiaPreview = [...imagesPreview];
+    // revoke previous blob URL if it exists and was created locally
+    const prev = copiaPreview[index];
+    if (prev && prev.startsWith('blob:')) {
+      try { URL.revokeObjectURL(prev); } catch (e) { /* ignore */ }
+    }
+    copia[index] = file || null;
+    if (file) {
+      copiaPreview[index] = URL.createObjectURL(file);
+    } else {
+      copiaPreview[index] = null;
+    }
+    setImages(copia);
+    setImagesPreview(copiaPreview);
   };
 
   const handleCancelar = () => {
@@ -149,10 +265,23 @@ export default function ProductosAdmin() {
     setMostrarFormulario(false);
     setEditando(false);
     setErrores({});
+    // revoke any created blob URLs
+    imagesPreview.forEach(url => { if (url && url.startsWith('blob:')) { try { URL.revokeObjectURL(url); } catch(e){} } });
+    setImages([null, null, null, null]);
+    setImagesPreview([null, null, null, null]);
   };
 
   const handleEditar = (producto: Producto) => {
     setFormData({ ...producto, descripcion: producto.descripcion || '' });
+    // show existing images as previews (they are URLs returned from backend)
+    setImagesPreview([
+      producto.imagen || null,
+      producto.imagen2 || null,
+      producto.imagen3 || null,
+      producto.imagen4 || null,
+    ]);
+    // reset local File selection
+    setImages([null, null, null, null]);
     setMostrarFormulario(true);
     setEditando(true);
   };
@@ -165,7 +294,6 @@ export default function ProductosAdmin() {
       const nuevosProductos = productos.filter(p => String(p.id) !== String(producto.id));
       setProductosState(nuevosProductos);
       setNotificacion({ mensaje: 'Producto eliminado exitosamente', tipo: 'success' });
-      window.alert('Producto eliminado exitosamente');
     } catch (error) {
       console.error('Error al eliminar producto:', error);
       setNotificacion({ mensaje: 'Error al eliminar el producto', tipo: 'error' });
@@ -220,7 +348,7 @@ export default function ProductosAdmin() {
                   value={formData.categoria}
                   onChange={(e) => setFormData({...formData, categoria: e.target.value as FormData['categoria']})}
                 >
-                  <option value="">Selecciona una categoría</option>
+                  <option value="" disabled hidden>Selecciona una categoría</option>
                   <option value="frutas">Frutas</option>
                   <option value="verduras">Verduras</option>
                   <option value="organicos">Productos Orgánicos</option>
@@ -293,11 +421,39 @@ export default function ProductosAdmin() {
                 </div>
               </div>
 
+              <div className="mb-3">
+                <label className="form-label">Imágenes (opcional)</label>
+                <div className="d-flex gap-3 flex-wrap">
+                  {[0,1,2,3].map(i => (
+                    <div key={i} className="d-flex flex-column align-items-start" style={{minWidth: 160}}>
+                      <label className="form-label">Imagen {i + 1}</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageChange(i, e.target.files?.[0] || null)}
+                        className="form-control mb-2"
+                      />
+                      {imagesPreview[i] ? (
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                          <img src={imagesPreview[i] || ''} alt={`preview-${i}`} style={{ width: 100, height: 80, objectFit: 'cover', borderRadius: 4, border: '1px solid #ddd' }} />
+                          <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => handleImageChange(i, null)}>Eliminar</button>
+                        </div>
+                      ) : (
+                        <div style={{ width: 100, height: 80, border: '1px dashed #ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#777' }}>
+                          Sin imagen
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="d-flex gap-2">
                 <button 
                   type="submit" 
                   className="btn btn-success"
                   disabled={cargando}
+                  onClick={() => console.log('[ProductosAdmin] submit button clicked')}
                 >
                   {cargando ? (
                     <>
@@ -333,9 +489,18 @@ export default function ProductosAdmin() {
             data={productos}
             cols={[
               { key: 'nombre', header: 'Nombre' },
-              { key: 'categoria', header: 'Categoría', render: (r) => r.categoria.charAt(0).toUpperCase() + r.categoria.slice(1) },
+              { key: 'categoria', header: 'Categoría', render: (r) => (r.categoria ? r.categoria.charAt(0).toUpperCase() + r.categoria.slice(1) : '') },
               { key: 'precio', header: 'Precio', render: (r) => formatearPrecio(r.precio) },
-              { key: 'stock', header: 'Stock' },
+              { key: 'stock', header: 'Stock', render: (r) => {
+                  const s = Number(r.stock || 0);
+                  const low = !isNaN(s) && s <= 5;
+                  return (
+                    <span className={low ? 'text-danger fw-bold' : ''}>
+                      {s}
+                    </span>
+                  );
+                }
+              },
               { 
                 key: 'activo', 
                 header: 'Estado', 

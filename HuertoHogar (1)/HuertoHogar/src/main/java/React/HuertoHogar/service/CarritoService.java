@@ -6,6 +6,7 @@ import React.HuertoHogar.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CarritoService {
@@ -35,10 +36,21 @@ public class CarritoService {
         item.setCarrito(c);
         // si existe el mismo producto, incrementar cantidad
         for (CarritoItem ci : c.getItems()) {
-            if (ci.getProductoId().equals(item.getProductoId())) {
-                ci.setCantidad(ci.getCantidad() + item.getCantidad());
-                return carritoRepository.save(c);
+            if (ci.getProductoId() != null && ci.getProductoId().equals(item.getProductoId())) {
+                int nueva = ci.getCantidad() + (item.getCantidad() == null ? 0 : item.getCantidad());
+                if (nueva <= 0) {
+                    // eliminar el item si la nueva cantidad es 0 o negativa
+                    c.getItems().remove(ci);
+                    return carritoRepository.save(c);
+                } else {
+                    ci.setCantidad(nueva);
+                    return carritoRepository.save(c);
+                }
             }
+        }
+        // si la cantidad a agregar es <= 0, no agregar nuevo item
+        if (item.getCantidad() == null || item.getCantidad() <= 0) {
+            return carritoRepository.save(c);
         }
         c.getItems().add(item);
         return carritoRepository.save(c);
@@ -62,7 +74,8 @@ public class CarritoService {
         v.setUsuario(c.getUsuario());
         for (CarritoItem ci : c.getItems()) {
             VentaItem vi = new VentaItem();
-            vi.setProductoId(ci.getProductoId());
+            // productoId in VentaItem is a String now; convertir desde Long
+            vi.setProductoId(ci.getProductoId() == null ? "" : String.valueOf(ci.getProductoId()));
             vi.setNombre(ci.getNombre());
             vi.setPrecio(ci.getPrecio());
             vi.setCantidad(ci.getCantidad());
@@ -72,6 +85,41 @@ public class CarritoService {
         // limpiar carrito
         c.getItems().clear();
         carritoRepository.save(c);
+        return saved;
+    }
+
+    @Transactional
+    public Venta checkoutWithItems(Long usuarioId, java.util.List<React.HuertoHogar.dto.VentaItemDTO> items) {
+        System.out.println("[CarritoService] checkoutWithItems called for usuarioId=" + usuarioId + ", itemsCount=" + (items==null?0:items.size()));
+        Usuario u = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        Venta v = new Venta();
+        v.setUsuario(u);
+
+        if (items != null) {
+            for (React.HuertoHogar.dto.VentaItemDTO ci : items) {
+                VentaItem vi = new VentaItem();
+                // asegurarse de que campos no nulos; productoId almacenado como String
+                vi.setProductoId(ci.getProductoId() == null ? "" : ci.getProductoId());
+                vi.setNombre(ci.getNombre() == null ? "" : ci.getNombre());
+                vi.setPrecio(ci.getPrecio() == null ? 0.0 : ci.getPrecio());
+                vi.setCantidad(ci.getCantidad() == null ? 1 : ci.getCantidad());
+                vi.setVenta(v);
+                v.getItems().add(vi);
+            }
+        }
+
+        Venta saved = ventaService.save(v);
+        // Limpiar el carrito persistente del usuario si existe
+        try {
+            carritoRepository.findByUsuarioId(usuarioId).ifPresent(c -> {
+                c.getItems().clear();
+                carritoRepository.save(c);
+            });
+        } catch (Exception ex) {
+            // no detener el proceso de venta si la limpieza del carrito falla, pero loguear
+            System.err.println("[CarritoService] error limpiando carrito persistente: " + ex.getMessage());
+        }
+
         return saved;
     }
 }

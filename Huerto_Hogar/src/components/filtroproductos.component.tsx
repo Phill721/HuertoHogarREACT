@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { Categoria } from "../data/Productos";
 
 interface Props {
-    onFilter: (categoria: Categoria | null) => void;
+    onFilter: (categoria: string | null) => void;
 }
 
 export function FiltroProductos({ onFilter }: Props) {
-    const [activeCategory, setActiveCategory] = useState<Categoria | null>(null);
+    const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-    const handleFilter = (categoria: Categoria | null) => {
-        setActiveCategory(categoria);
-        onFilter(categoria);
+    const handleFilter = (categoriaCode: string | null, displayName?: string) => {
+        setActiveCategory(categoriaCode);
+        onFilter(categoriaCode);
     };
 
     return (
@@ -33,41 +32,41 @@ export function FiltroProductos({ onFilter }: Props) {
                         <p className="mb-2 fw-bold">Categorías:</p>
                         <div className="d-flex flex-wrap justify-content-center">
                             <button
-                                className={`btn me-2 mb-2 ${activeCategory === Categoria.FrutasFrescas
+                                className={`btn me-2 mb-2 ${activeCategory === 'frutas'
                                         ? "btn-light text-success fw-bold"
                                         : "btn-outline-light"
                                     }`}
-                                onClick={() => handleFilter(Categoria.FrutasFrescas)}
+                                onClick={() => handleFilter('frutas')}
                             >
                                 Frutas frescas
                             </button>
 
                             <button
-                                className={`btn me-2 mb-2 ${activeCategory === Categoria.VerdurasOrganicas
+                                className={`btn me-2 mb-2 ${activeCategory === 'verduras'
                                         ? "btn-light text-success fw-bold"
                                         : "btn-outline-light"
                                     }`}
-                                onClick={() => handleFilter(Categoria.VerdurasOrganicas)}
+                                onClick={() => handleFilter('verduras')}
                             >
                                 Verduras orgánicas
                             </button>
 
                             <button
-                                className={`btn me-2 mb-2 ${activeCategory === Categoria.ProductosOrganicos
+                                className={`btn me-2 mb-2 ${activeCategory === 'organicos'
                                         ? "btn-light text-success fw-bold"
                                         : "btn-outline-light"
                                     }`}
-                                onClick={() => handleFilter(Categoria.ProductosOrganicos)}
+                                onClick={() => handleFilter('organicos')}
                             >
                                 Productos orgánicos
                             </button>
 
                             <button
-                                className={`btn me-2 mb-2 ${activeCategory === Categoria.ProductosLacteos
+                                className={`btn me-2 mb-2 ${activeCategory === 'lacteos'
                                         ? "btn-light text-success fw-bold"
                                         : "btn-outline-light"
                                     }`}
-                                onClick={() => handleFilter(Categoria.ProductosLacteos)}
+                                onClick={() => handleFilter('lacteos')}
                             >
                                 Productos lácteos
                             </button>

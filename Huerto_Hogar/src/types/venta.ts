@@ -11,4 +11,5 @@ export interface Venta {
   fecha: string;  // Formato ISO, ejemplo: '2025-10-20'
   total: number;
   detalles: DetalleVenta[];
+  clienteNombre?: string;
 }

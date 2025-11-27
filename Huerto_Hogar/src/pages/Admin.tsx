@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { MOCK_PRODUCTOS, MOCK_USUARIOS, MOCK_VENTAS } from '../data/mock';
 import { FaBox, FaUsers, FaShoppingCart, FaChartLine } from 'react-icons/fa';
+import productoService from '../services/productoService';
+import usuarioService from '../services/usuarioService';
+import ventaService from '../services/ventaService';
 
 export default function Admin() {
   const [estadisticas, setEstadisticas] = useState({
@@ -11,20 +13,43 @@ export default function Admin() {
     ventasHoy: 0,
     ingresos: 0
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const hoy = new Date();
-    const ventasHoy = MOCK_VENTAS.filter(v => 
-      new Date(v.fecha).toDateString() === hoy.toDateString()
-    );
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const [productos, usuarios, ventas] = await Promise.all([
+          productoService.getAll(),
+          usuarioService.getAll(),
+          ventaService.getAll()
+        ]);
 
-    setEstadisticas({
-      productos: MOCK_PRODUCTOS.filter(p => p.activo).length,
-      usuarios: MOCK_USUARIOS.filter(u => u.activo).length,
-      ventas: MOCK_VENTAS.length,
-      ventasHoy: ventasHoy.length,
-      ingresos: MOCK_VENTAS.reduce((sum, v) => sum + v.total, 0)
-    });
+        const hoy = new Date();
+        const ventasHoy = (ventas || []).filter((v: any) => {
+          try {
+            return new Date(v.fecha).toDateString() === hoy.toDateString();
+          } catch (e) { return false; }
+        });
+
+        const ingresos = (ventas || []).reduce((sum: number, v: any) => sum + (Number(v.total) || 0), 0);
+
+        setEstadisticas({
+          productos: (productos || []).filter((p: any) => p.activo !== false).length,
+          usuarios: (usuarios || []).filter((u: any) => u.activo !== false).length,
+          ventas: (ventas || []).length,
+          ventasHoy: ventasHoy.length,
+          ingresos
+        });
+      } catch (ex: any) {
+        console.error('Error cargando estadísticas admin', ex);
+        setError(ex?.message || 'Error cargando datos');
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   const formatearPrecio = (precio: number) => {
@@ -36,6 +61,12 @@ export default function Admin() {
 
   return (
     <div className="container-fluid px-4">
+      {loading && (
+        <div className="alert alert-info">Cargando estadísticas...</div>
+      )}
+      {error && (
+        <div className="alert alert-danger">Error: {error}</div>
+      )}
       <div className="text-center mb-5">
         <h2 className="mb-3" style={{ color: 'var(--accent-green)' }}>
           Panel de Administración

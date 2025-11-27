@@ -28,6 +28,18 @@ public class Producto {
     @Column(nullable = false)
     private Boolean activo = true;
 
+    @Column(length = 200)
+    private String imagen;
+
+    @Column(length = 200)
+    private String imagen2;
+
+    @Column(length = 200)
+    private String imagen3;
+
+    @Column(length = 200)
+    private String imagen4;
+
     public Producto() {
     }
 
@@ -86,5 +98,37 @@ public class Producto {
 
     public void setActivo(Boolean activo) {
         this.activo = activo;
+    }
+
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
+    }
+
+    public String getImagen2() {
+        return imagen2;
+    }
+
+    public void setImagen2(String imagen2) {
+        this.imagen2 = imagen2;
+    }
+
+    public String getImagen3() {
+        return imagen3;
+    }
+
+    public void setImagen3(String imagen3) {
+        this.imagen3 = imagen3;
+    }
+
+    public String getImagen4() {
+        return imagen4;
+    }
+
+    public void setImagen4(String imagen4) {
+        this.imagen4 = imagen4;
     }
 }

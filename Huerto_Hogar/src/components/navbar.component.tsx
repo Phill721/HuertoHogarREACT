@@ -10,11 +10,12 @@ export const nodeco: CSSProperties = {
 export function NavbarComponent() {
     const { currentUser, logout } = useContext(UserContext);
 
-    // 👉 Validación: ¿es profesor?
-    const esProfesor = currentUser?.correo?.endsWith("@profesor.duoc.cl");
+    // 👉 Validación: ¿es admin? (usar rol si está disponible, fallback por correo)
+    const isAdmin = (currentUser as any)?.rol === 'admin' || currentUser?.correo === 'admin@gmail.com';
+    // DEBUG: mostrar información útil en desarrollo
     console.log("📢 DEBUG currentUser =>", currentUser);
     console.log("📢 Tipo:", typeof currentUser);
-    console.log("📢 Es profesor? =>", currentUser?.correo?.endsWith("@profesor.duoc.cl"));
+    console.log("📢 Is admin? =>", isAdmin);
 
     return (
         <>
@@ -93,8 +94,8 @@ export function NavbarComponent() {
                                     </a>
                                     <ul className="dropdown-menu">
 
-                                        {/* 🔥 Panel de Admin SOLO para profesores */}
-                                        {esProfesor && (
+                                        {/* 🔥 Panel de Admin: mostrar si el usuario tiene rol 'admin' */}
+                                        {isAdmin && (
                                             <>
                                                 <li>
                                                     <Link to="/admin" className="dropdown-item">

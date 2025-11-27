@@ -36,6 +36,11 @@ public class ProductoService {
             existing.setStock(producto.getStock());
             existing.setDescripcion(producto.getDescripcion());
             existing.setActivo(producto.getActivo());
+            // copiar imágenes si vienen en el objeto producto (permitir reemplazo)
+            if (producto.getImagen() != null) existing.setImagen(producto.getImagen());
+            if (producto.getImagen2() != null) existing.setImagen2(producto.getImagen2());
+            if (producto.getImagen3() != null) existing.setImagen3(producto.getImagen3());
+            if (producto.getImagen4() != null) existing.setImagen4(producto.getImagen4());
             return productoRepository.save(existing);
         }).orElseGet(() -> {
             producto.setId(id);

@@ -14,6 +14,7 @@ export function CarritoDedicado() {
     const [mensaje, setMensaje] = useState("");
     const [showModal, setShowModal] = useState(false);
     const [cargando, setCargando] = useState(false);
+    const [ventaCreada, setVentaCreada] = useState<any | null>(null);
 
     const aplicarDescuento = () => {
         const encontrado = discountCodes.find(
@@ -66,15 +67,27 @@ export function CarritoDedicado() {
             }
 
             // Si el backend gestiona carrito por usuario, aseguramos items en carrito persistente si fuera necesario
-            // Realizar checkout
-            const venta = await carritoService.checkout(usuario.id);
+            // Realizar checkout enviando los items del carrito al backend
+            const venta = await carritoService.checkout(usuario.id, cart.map((it: any) => ({
+                productoId: String(it.id),
+                nombre: it.nombre,
+                precio: it.precio,
+                cantidad: it.cantidad
+            })));
             console.log('Venta creada:', venta);
+            // guardar la venta para mostrar boleta
+            setVentaCreada(venta);
             setShowModal(true);
             // limpiar carrito local
             clearCart();
         } catch (error) {
             console.error('Error al realizar checkout:', error);
-            alert('Error al procesar la compra. Revisa la consola para más detalles.');
+            const msg = (error as any)?.message || String(error);
+            if (msg && msg.toLowerCase().includes('stock')) {
+                alert(`No fue posible completar la compra: ${msg}`);
+            } else {
+                alert('Error al procesar la compra. Revisa la consola para más detalles.');
+            }
         } finally {
             setCargando(false);
         }
@@ -82,7 +95,11 @@ export function CarritoDedicado() {
 
     const handleCloseModal = () => {
         setShowModal(false);
-        //clearCart();
+        // si cerramos la boleta, limpiar estado de venta y refrescar UI para stock
+        if (ventaCreada) {
+            setVentaCreada(null);
+            setTimeout(() => window.location.reload(), 400);
+        }
         setCodigo("");
         setDescuento(0);
         setMensaje("");
@@ -203,13 +220,45 @@ export function CarritoDedicado() {
                 </div>
             </div>
 
-            {/* Modal de confirmación */}
-            <ModalComponent
-                title="✅ Compra realizada"
-                message="Tu compra se ha realizado correctamente. En una versión en producción de esta web, serías redirigido hacia una página de pagos 💳"
-                show={showModal}
-                onClose={handleCloseModal}
-            />
+            {/* Modal: boleta de la venta si existe, sino mensaje genérico */}
+            {ventaCreada ? (
+                <ModalComponent
+                    title={`Boleta #${ventaCreada.id ?? ''}`}
+                    show={showModal}
+                    onClose={handleCloseModal}
+                    size="sm"
+                >
+                    <div>
+                        <p className="mb-1"><strong>Fecha:</strong> {ventaCreada.fecha ? new Date(ventaCreada.fecha).toLocaleString() : ''}</p>
+                        <p className="mb-2"><strong>Cliente:</strong> {ventaCreada.usuario ? (ventaCreada.usuario.nombre || ventaCreada.usuario.email) : ''}</p>
+                        <hr />
+                        <div>
+                            {(ventaCreada.items || []).map((it: any, idx: number) => (
+                                <div key={idx} className="d-flex justify-content-between mb-2">
+                                    <div>
+                                        <span className="fw-bold">{it.cantidad}x</span> {it.nombre}
+                                    </div>
+                                    <div className="text-end">
+                                        {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format((it.precio || 0) * (it.cantidad || 0))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between">
+                            <strong>Total:</strong>
+                            <strong className="text-success">{ventaCreada.total ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(ventaCreada.total) : ''}</strong>
+                        </div>
+                    </div>
+                </ModalComponent>
+            ) : (
+                <ModalComponent
+                    title="✅ Compra realizada"
+                    message="Tu compra se ha realizado correctamente. En una versión en producción de esta web, serías redirigido hacia una página de pagos 💳"
+                    show={showModal}
+                    onClose={handleCloseModal}
+                />
+            )}
         </div>
     );
 }

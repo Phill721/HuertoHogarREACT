@@ -26,6 +26,14 @@ export function Login() {
             return;
         }
 
+        // Validación mínima de longitud de contraseña (5 caracteres)
+        if (contraseña.length < 5) {
+            setModalTitle("Contraseña inválida ❌");
+            setModalMessage("La contraseña debe tener al menos 5 caracteres.");
+            setShowModal(true);
+            return;
+        }
+
         const validDomains = ["@gmail.com", "@duoc.cl", "@profesor.duoc.cl"];
         if (!validDomains.some(domain => correo.endsWith(domain))) {
             setModalTitle("Correo inválido ❌");

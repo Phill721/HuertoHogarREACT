@@ -40,6 +40,14 @@ export function SignUp() {
             return;
         }
 
+        // Validación mínima de longitud de contraseña (5 caracteres)
+        if (contraseña.length < 5) {
+            setModalTitle("Contraseña inválida ❌");
+            setModalMessage("La contraseña debe tener al menos 5 caracteres");
+            setShowModal(true);
+            return;
+        }
+
         // Validación de confirmaciones
         if (correo !== correoConfirm) {
             setModalTitle("Error en correo ❌");

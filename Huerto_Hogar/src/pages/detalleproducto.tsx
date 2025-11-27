@@ -1,12 +1,25 @@
 import { useParams } from "react-router";
-import { productos, type Producto } from "../data/Productos";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { ReviewSection } from "../components/reviewsection.component";
 import { ModalComponent } from "../components/modal.component";
 import { CartContext } from "../context/CartContext"; // <- asegúrate de que la ruta sea correcta
+import productoService from '../services/productoService';
+
+type ProductoAPI = {
+    id: number;
+    nombre: string;
+    descripcion?: string;
+    precio: number;
+    imagen?: string;
+    imagen2?: string;
+    imagen3?: string;
+    imagen4?: string;
+    categoria?: string;
+    stock?: number;
+}
 
 export function DetalleProducto() {
-    const { addToCart } = useContext(CartContext);
+    const { addToCart, cart } = useContext(CartContext);
     const [showModal, setShowModal] = useState(false);
     const [modalInfo, setModalInfo] = useState({
         title: "",
@@ -14,11 +27,34 @@ export function DetalleProducto() {
     });
 
     const { nombre } = useParams();
-    const producto: Producto | undefined = productos.find(
-        (p) => p.id.toLowerCase().replace(/\s+/g, "-") === nombre
-    );
+    const [producto, setProducto] = useState<ProductoAPI | null>(null);
+    const [imagenPrincipal, setImagenPrincipal] = useState<string | undefined>(undefined);
+    const [cargando, setCargando] = useState(true);
 
-    const [imagenPrincipal, setImagenPrincipal] = useState(producto?.imagen);
+    useEffect(() => {
+        (async () => {
+            setCargando(true);
+            try {
+                const all = await productoService.getAll();
+                const slug = String(nombre || '').toLowerCase();
+                const found = (all as any[]).find((p: any) => String(p.nombre).toLowerCase().replace(/\s+/g, "-") === slug);
+                if (found) {
+                    // normalizar imagen y stock
+                    const normalized = {
+                        ...found,
+                        imagen: (found as any).imagen || (found as any).imagen1 || '/espinaca4.jfif',
+                        stock: typeof (found as any).stock === 'number' ? (found as any).stock : ((found as any).cantidad || 0)
+                    } as ProductoAPI;
+                    setProducto(normalized);
+                    setImagenPrincipal(normalized.imagen);
+                }
+            } catch (err) {
+                console.error('Error cargando producto desde API:', err);
+            } finally {
+                setCargando(false);
+            }
+        })();
+    }, [nombre]);
 
     const handleAddToCart = () => {
         const input = document.getElementById("cantidad") as HTMLInputElement;
@@ -33,24 +69,40 @@ export function DetalleProducto() {
             return;
         }
 
-        if (producto) {
-            addToCart({
-                id: producto.id,
-                nombre: producto.nombre,
-                precio: producto.precio,
-                imagen: producto.imagen,
-                cantidad,
-            });
+        if (!producto) return;
 
+        // validar stock localmente antes de enviar al carrito
+        const existente = cart.find((c) => String(c.id) === String(producto.id));
+        const cantidadActual = existente ? existente.cantidad : 0;
+        if (typeof producto.stock === 'number' && cantidadActual + cantidad > producto.stock) {
             setModalInfo({
-                title: "Producto agregado!",
-                message: `Se agregó ${cantidad} unidad${cantidad > 1 ? "es" : ""} de ${producto.nombre} al carrito.`,
+                title: "Stock insuficiente",
+                message: `No hay suficiente stock disponible. Stock actual: ${producto.stock}, solicitado: ${cantidadActual + cantidad}`
             });
             setShowModal(true);
+            return;
         }
+
+        addToCart({
+            id: String(producto.id),
+            nombre: producto.nombre,
+            precio: producto.precio,
+            imagen: producto.imagen || '',
+            cantidad,
+        });
+
+        setModalInfo({
+            title: "Producto agregado!",
+            message: `Se agregó ${cantidad} unidad${cantidad > 1 ? "es" : ""} de ${producto.nombre} al carrito.`,
+        });
+        setShowModal(true);
     };
 
-    if (!producto) {
+        if (cargando) {
+            return <div className="container my-5">Cargando...</div>;
+        }
+
+        if (!producto) {
         return (
             <>
                 <div className="container-fluid my-5">
@@ -74,7 +126,11 @@ export function DetalleProducto() {
                     <small>
                         <a href="/" style={{ color: "#2E8B57" }}>Inicio</a> &gt;{" "}
                         <a href={`/productos?categoria=${producto.categoria}`} style={{ color: "#2E8B57" }}>
-                            {producto.categoria}
+                            {(() => {
+                                const map: Record<string,string> = { frutas: 'Frutas frescas', verduras: 'Verduras orgánicas', organicos: 'Productos orgánicos', lacteos: 'Productos lácteos' };
+                                const code = (producto.categoria || '').toString().toLowerCase();
+                                return map[code] || producto.categoria;
+                            })()}
                         </a>{" "}
                         &gt; <span>{producto.nombre}</span>
                     </small>
